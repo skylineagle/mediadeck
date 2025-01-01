@@ -1,25 +1,26 @@
 "use client";
 
+import { useMetricsStore } from "@/lib/stores/metrics";
 import type { Path } from "@/lib/types";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
 
-type StatusType = "live" | "ready" | "streaming" | "unknown";
+type StatusType = "live" | "waiting" | "streaming" | "unknown";
 
 const iconConfig = {
   live: {
     bgColor: "bg-red-500",
     dotColor: "bg-white",
-    text: "LIVE",
+    text: "Live",
     animation: {
       scale: [1, 1.2, 1],
       opacity: [1, 0.8, 1],
     },
   },
-  ready: {
+  waiting: {
     bgColor: "bg-yellow-500",
     dotColor: "bg-white",
-    text: "READY",
+    text: "Waiting",
     animation: {
       scale: [1, 1.1, 1],
       opacity: [1, 0.9, 1],
@@ -28,7 +29,7 @@ const iconConfig = {
   streaming: {
     bgColor: "bg-green-500",
     dotColor: "bg-white",
-    text: "STREAMING",
+    text: "Streaming",
     animation: {
       x: ["-100%", "100%"],
       opacity: [0, 1, 0],
@@ -50,14 +51,17 @@ function getPathState(pathState: Path): StatusType {
   if (pathState?.readers?.length && pathState.readers.length > 0) {
     return "streaming";
   }
+  if (pathState?.ready) {
+    return "live";
+  }
 
-  return "live";
+  return "waiting";
 }
 
 export const PathStatus: React.FC<LiveIconProps> = ({ path }) => {
   const { data: pathState } = api.path.getPathState.useQuery(
     { name: path },
-    { throwOnError: false },
+    { throwOnError: false, refetchInterval: 500 },
   );
 
   if (!pathState) {

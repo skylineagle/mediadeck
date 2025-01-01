@@ -1,6 +1,5 @@
 import { PathStatus } from "@/components/path-status";
 import { StreamLink } from "@/components/stream-link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { isPathSynced } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { Database, RefreshCw } from "lucide-react";
@@ -71,12 +71,14 @@ export async function Paths() {
                   <TableHead className="w-[50px]">DB</TableHead>
                   <TableHead className="w-[200px]">Name</TableHead>
                   <TableHead className="w-[200px]">Source</TableHead>
+                  <TableHead className="w-[100px]">Mode</TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {allActivePaths.map((path) => {
+                  const isProxy = path.source?.type?.endsWith("Source");
                   const isSynced = isPathSynced(path.name ?? "", paths ?? []);
                   const configPath = configPaths?.find(
                     (p) => p.name === path.name,
@@ -85,31 +87,36 @@ export async function Paths() {
                   return (
                     <TableRow key={path.name}>
                       <TableCell className="w-[50px]">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Database
-                                className={`h-4 w-4 ${isSynced ? "text-blue-400" : "text-muted-foreground"}`}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {isSynced
-                                ? "Synced to Database"
-                                : "Not Synced to Database"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        {isProxy && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Database
+                                  className={`h-4 w-4 ${isSynced ? "text-blue-400" : "text-muted-foreground"}`}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {isSynced
+                                  ? "Synced to Database"
+                                  : "Not Synced to Database"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </TableCell>
                       <TableCell className="w-[200px]">{path.name}</TableCell>
                       <TableCell className="w-[200px]">
                         {configPath?.source ?? path.source?.type ?? "-"}
+                      </TableCell>
+                      <TableCell className="w-[100px]">
+                        <Badge>{isProxy ? "Proxy" : "Session"}</Badge>
                       </TableCell>
                       <TableCell>
                         <PathStatus path={path.name ?? ""} />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {!isSynced && (
+                          {isProxy && !isSynced && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -137,7 +144,7 @@ export async function Paths() {
                             </TooltipProvider>
                           )}
                           {path.name && <StreamLink name={path.name} />}
-                          {isSynced && (
+                          {isProxy && isSynced && (
                             <RemovePath pathToDelete={path.name ?? ""} />
                           )}
                         </div>
@@ -196,26 +203,29 @@ export async function Paths() {
               <TableBody>
                 {inactivePaths.map((path) => {
                   const isSynced = isPathSynced(path.name ?? "", paths ?? []);
+                  const isProxy = path.source?.endsWith("Source");
                   return (
                     <TableRow
                       key={path.name}
                       className={!isSynced ? "bg-muted/30" : undefined}
                     >
                       <TableCell className="w-[50px]">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Database
-                                className={`h-4 w-4 ${isSynced ? "text-blue-400" : "text-muted-foreground"}`}
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {isSynced
-                                ? "Synced to Database"
-                                : "Not Synced to Database"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        {isProxy && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Database
+                                  className={`h-4 w-4 ${isSynced ? "text-blue-400" : "text-muted-foreground"}`}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {isSynced
+                                  ? "Synced to Database"
+                                  : "Not Synced to Database"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </TableCell>
                       <TableCell className="w-[200px]">{path.name}</TableCell>
                       <TableCell className="w-[200px]">
@@ -229,55 +239,56 @@ export async function Paths() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          {!isSynced ? (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <form
-                                    action={handleSync.bind(
-                                      null,
-                                      path.name ?? "",
-                                    )}
-                                  >
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      type="submit"
-                                      className="gap-2"
+                          {isProxy &&
+                            (!isSynced ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <form
+                                      action={handleSync.bind(
+                                        null,
+                                        path.name ?? "",
+                                      )}
                                     >
-                                      <RefreshCw className="h-4 w-4" />
-                                      Sync to DB
-                                    </Button>
-                                  </form>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  Import this path into the database
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Switch
-                                    checked={isSynced}
-                                    onCheckedChange={async (checked) => {
-                                      "use server";
-                                      await api.path.toggle({
-                                        name: path.name ?? "",
-                                        enabled: checked,
-                                      });
-                                    }}
-                                  />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {isSynced ? "Disable Path" : "Enable Path"}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        type="submit"
+                                        className="gap-2"
+                                      >
+                                        <RefreshCw className="h-4 w-4" />
+                                        Sync to DB
+                                      </Button>
+                                    </form>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    Import this path into the database
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Switch
+                                      checked={isSynced}
+                                      onCheckedChange={async (checked) => {
+                                        "use server";
+                                        await api.path.toggle({
+                                          name: path.name ?? "",
+                                          enabled: checked,
+                                        });
+                                      }}
+                                    />
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {isSynced ? "Disable Path" : "Enable Path"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ))}
                           {path.name && <StreamLink name={path.name} />}
-                          {isSynced && (
+                          {isProxy && isSynced && (
                             <RemovePath pathToDelete={path.name ?? ""} />
                           )}
                         </div>

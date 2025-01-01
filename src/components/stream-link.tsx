@@ -8,7 +8,7 @@ interface StreamLinkProps {
 
 export function StreamLink({ name }: StreamLinkProps) {
   return (
-    <Link href={`http://localhost:8889/${name}`} target="_blank">
+    <Link href={`http://localhost:8888/${name}`} target="_blank">
       <Button variant="outline" size="sm">
         <Video className="h-4 w-4" />
       </Button>

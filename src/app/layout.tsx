@@ -4,6 +4,8 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import "@/styles/globals.css";
+import { Settings } from "lucide-react";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -17,7 +19,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <div className="container mx-auto p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h1 className="text-3xl font-bold">Media Deck</h1>
+              <Link href="/settings">
+                <Settings />
+              </Link>
+            </div>
+            {children}
+          </div>
+        </TRPCReactProvider>
         <Toaster />
       </body>
     </html>

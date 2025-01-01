@@ -23,6 +23,7 @@ import { api } from "@/trpc/server";
 import { Database, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { RemovePath } from "./remove-path";
+import { PathStatus } from "@/components/path-status";
 
 export async function Paths() {
   const paths = await api.path.getAll();
@@ -100,24 +101,13 @@ export async function Paths() {
                     </TableCell>
                     <TableCell className="flex items-center gap-2">
                       {path.name}
-                      {/* {isInMediaMTX && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Server className="h-4 w-4 text-muted-foreground" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              Available in MediaMTX
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )} */}
                     </TableCell>
                     <TableCell>{path.source}</TableCell>
                     <TableCell>{path.sourceOnDemand ? "Yes" : "No"}</TableCell>
                     <TableCell>{path.record ? "Yes" : "No"}</TableCell>
                     <TableCell>
-                      <Badge
+                      <PathStatus status={isSynced ? "live" : "ready"} />
+                      {/* <Badge
                         variant={
                           isSynced
                             ? isInMediaMTX
@@ -131,7 +121,7 @@ export async function Paths() {
                             ? "Active"
                             : "Pending"
                           : "Not Synced"}
-                      </Badge>
+                      </Badge> */}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -175,14 +165,6 @@ export async function Paths() {
                   </TableCell>
                   <TableCell className="flex items-center gap-2">
                     {path.name}
-                    {/* <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Server className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>Available in MediaMTX</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider> */}
                   </TableCell>
                   <TableCell>{path.source ? path.source : "-"}</TableCell>
                   <TableCell>{path.sourceOnDemand ? "Yes" : "No"}</TableCell>

@@ -1,4 +1,4 @@
-import { Paths, PathsConfigs } from "@/lib/types";
+import type { Path, PathsConfigsResponse } from "@/lib/types";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -29,7 +29,7 @@ export const pathRouter = createTRPCRouter({
   create: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
     try {
       // Add to Media MTX
-      const response = await ky
+      await ky
         .post(`http://localhost:9997/v3/config/paths/add/${input.name}`, {
           json: input,
         })
@@ -143,9 +143,28 @@ export const pathRouter = createTRPCRouter({
 
   listPaths: publicProcedure.query(async () => {
     const response = await ky
-      .get<PathsConfigs>("http://localhost:9997/v3/config/paths/list")
+      .get<PathsConfigsResponse>("http://localhost:9997/v3/config/paths/list")
       .json();
-    
+
     return response.items ?? [];
+  }),
+
+  listPublishers: publicProcedure.query(async () => {
+    const paths = await ky
+      .get<Path[]>(`${process.env.NEXT_PUBLIC_MEDIAMTX_API_URL}/v3/paths/list`)
+      .json();
+
+    const publisherPaths = paths?.filter((path) => {
+      if (!path.source) return false;
+      return [
+        "rtmpConn",
+        "rtspSession",
+        "rtspsSession",
+        "srtConn",
+        "webRTCSession",
+      ].includes(path.source.type ?? "");
+    });
+
+    return publisherPaths;
   }),
 });

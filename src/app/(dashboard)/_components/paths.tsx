@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { RemovePath } from "./remove-path";
+import Link from "next/link";
 
 export async function Paths() {
   const paths = await api.path.getAll();
@@ -46,8 +47,11 @@ export async function Paths() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Configured Paths</CardTitle>
+        <Link href="/create">
+          <Button>Add Path</Button>
+        </Link>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[600px]">

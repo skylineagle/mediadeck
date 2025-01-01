@@ -48,7 +48,7 @@ export default function CreatePathForm() {
   const { mutate, isPending } = api.path.create.useMutation({
     onSuccess: () => {
       toast.success("Path created successfully");
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     },
     onError: (error) => {

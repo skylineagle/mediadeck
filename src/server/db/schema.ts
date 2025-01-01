@@ -51,7 +51,6 @@ export const paths = createTable("path", {
   record: boolean("record").default(false),
   recordPath: varchar("record_path", { length: 1024 }),
   recordFormat: varchar("record_format", { length: 256 }),
-  enabled: boolean("enabled").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

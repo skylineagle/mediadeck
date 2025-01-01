@@ -16,7 +16,6 @@ const pathSchema = z.object({
   record: z.boolean().optional(),
   recordPath: z.string().optional(),
   recordFormat: z.string().optional(),
-  enabled: z.boolean().optional(),
 });
 
 export const pathRouter = createTRPCRouter({
@@ -38,10 +37,9 @@ export const pathRouter = createTRPCRouter({
       // Add to database
       await ctx.db.insert(paths).values({
         ...input,
-        enabled: true,
       });
 
-      revalidatePath("/dashboard");
+      revalidatePath("/");
       return { success: true };
     } catch (error) {
       console.error("Error creating path:", error);
@@ -55,9 +53,8 @@ export const pathRouter = createTRPCRouter({
       // Add to database
       await ctx.db.insert(paths).values({
         ...input,
-        enabled: true,
       });
-      revalidatePath("/dashboard");
+      revalidatePath("/");
     }),
 
   remove: publicProcedure
@@ -72,16 +69,24 @@ export const pathRouter = createTRPCRouter({
 
         if (!pathData) throw new Error("Path not found");
 
-        if (pathData.enabled) {
-          await ky.delete(
-            `http://localhost:9997/v3/config/paths/delete/${input.name}`,
-          );
+        // Check if path exists on MediaMTX
+
+        const response = await ky.get(
+          `http://localhost:9997/v3/config/paths/get/${input.name}`,
+        );
+
+        if (response.status === 200) {
+          await ky
+            .delete(
+              `http://localhost:9997/v3/config/paths/delete/${input.name}`,
+            )
+            .json();
         }
 
         // Remove from database
         await ctx.db.delete(paths).where(eq(paths.name, input.name));
 
-        revalidatePath("/dashboard");
+        revalidatePath("/");
         return { success: true };
       } catch (error) {
         console.error("Error removing path:", error);
@@ -92,12 +97,6 @@ export const pathRouter = createTRPCRouter({
   toggle: publicProcedure
     .input(z.object({ name: z.string(), enabled: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      // Update database
-      await ctx.db
-        .update(paths)
-        .set({ enabled: input.enabled })
-        .where(eq(paths.name, input.name));
-
       // Update MediaMTX
       if (input.enabled) {
         // Get path data from database
@@ -107,20 +106,15 @@ export const pathRouter = createTRPCRouter({
 
         if (!pathData) throw new Error("Path not found");
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { createdAt, updatedAt, id, ...info } = pathData;
+        console.log(info);
+
         // Add to MediaMTX
         const response = await ky.post(
-          `http://localhost:9997/v3/config/paths/add/${input.name}`,
+          `http://localhost:9997/v3/config/paths/add/${info.name}`,
           {
-            json: {
-              source: pathData.source,
-              sourceOnDemand: pathData.sourceOnDemand,
-              sourceOnDemandStartTimeout: pathData.sourceOnDemandStartTimeout,
-              sourceOnDemandCloseAfter: pathData.sourceOnDemandCloseAfter,
-              fallback: pathData.fallback,
-              record: pathData.record,
-              recordPath: pathData.recordPath,
-              recordFormat: pathData.recordFormat,
-            },
+            json: info,
           },
         );
 
@@ -129,8 +123,8 @@ export const pathRouter = createTRPCRouter({
         }
       } else {
         // Remove from MediaMTX
-        const response = await ky.post(
-          `http://localhost:9997/v3/config/paths/remove/${input.name}`,
+        const response = await ky.delete(
+          `http://localhost:9997/v3/config/paths/delete/${input.name}`,
         );
 
         if (!response.ok) {
@@ -138,6 +132,7 @@ export const pathRouter = createTRPCRouter({
         }
       }
 
+      revalidatePath("/");
       return { success: true };
     }),
 

@@ -66,7 +66,7 @@ export default function CreatePathForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-4">
+    <div className="mx-auto max-w-2xl space-y-8">
       <h1 className="mb-6 text-2xl font-bold">Create New Path</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

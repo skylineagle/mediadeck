@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
+import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -43,7 +44,7 @@ export function RemovePath({ pathToDelete }: RemovePathProps) {
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm">
-          Remove
+          <Trash className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

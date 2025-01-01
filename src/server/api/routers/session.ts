@@ -14,8 +14,6 @@ export const sessionRouter = createTRPCRouter({
       .get<RtspSessionResponse>("http://localhost:9997/v3/rtspsessions/list")
       .json();
 
-    console.log(response);
-
     return response.items ?? [];
   }),
 
@@ -23,8 +21,6 @@ export const sessionRouter = createTRPCRouter({
     const response = await ky
       .get<RtmpSessionResponse>("http://localhost:9997/v3/rtmpconns/list")
       .json();
-
-    console.log(response);
 
     return response.items ?? [];
   }),
@@ -36,8 +32,6 @@ export const sessionRouter = createTRPCRouter({
       )
       .json();
 
-    console.log(response);
-
     return response.items ?? [];
   }),
 
@@ -46,8 +40,6 @@ export const sessionRouter = createTRPCRouter({
       .get<HlsSessionResponse>("http://localhost:9997/v3/hlsmuxers/list")
       .json();
 
-    console.log(response);
-
     return response.items ?? [];
   }),
 
@@ -55,8 +47,6 @@ export const sessionRouter = createTRPCRouter({
     const response = await ky
       .get<SrtSessionResponse>("http://localhost:9997/v3/srtconns/list")
       .json();
-
-    console.log(response);
 
     return response.items ?? [];
   }),

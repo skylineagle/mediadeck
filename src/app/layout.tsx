@@ -1,11 +1,12 @@
+import { MetricsPoller } from "@/components/metrics-poller";
 import { Toaster } from "@/components/ui/sonner";
 import { TRPCReactProvider } from "@/trpc/react";
 import { GeistSans } from "geist/font/sans";
+import { Settings } from "lucide-react";
 import { type Metadata } from "next";
+import Link from "next/link";
 
 import "@/styles/globals.css";
-import { Settings } from "lucide-react";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -28,6 +29,7 @@ export default function RootLayout({
               </Link>
             </div>
             {children}
+            <MetricsPoller />
           </div>
         </TRPCReactProvider>
         <Toaster />

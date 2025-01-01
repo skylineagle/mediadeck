@@ -1,8 +1,8 @@
-import type { Path, PathsConfigsResponse } from "@/lib/types";
+import type { Path, PathsConfigsResponse, PathsResponse } from "@/lib/types";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -136,9 +136,17 @@ export const pathRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  listPaths: publicProcedure.query(async () => {
+  listPathsConfigs: publicProcedure.query(async () => {
     const response = await ky
       .get<PathsConfigsResponse>("http://localhost:9997/v3/config/paths/list")
+      .json();
+
+    return response.items ?? [];
+  }),
+
+  listPaths: publicProcedure.query(async () => {
+    const response = await ky
+      .get<PathsResponse>("http://localhost:9997/v3/paths/list")
       .json();
 
     return response.items ?? [];
@@ -162,4 +170,23 @@ export const pathRouter = createTRPCRouter({
 
     return publisherPaths;
   }),
+
+  getPathState: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        const path = await ky
+          .get<Path>(`http://localhost:9997/v3/paths/get/${input.name}`)
+          .json();
+
+        return path;
+      } catch (error) {
+        if (error instanceof HTTPError) {
+          if (error.response.status === 404) {
+            return null;
+          }
+        }
+        throw error;
+      }
+    }),
 });

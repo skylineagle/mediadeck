@@ -7,6 +7,9 @@ export type PathConfig = components["schemas"]["PathConf"];
 export type PathsResponse =
   paths["/v3/paths/list"]["get"]["responses"]["200"]["content"]["application/json"];
 
+export type PathResponse =
+  paths["/v3/paths/get/{name}"]["get"]["responses"]["200"]["content"]["application/json"];
+
 export type Path = components["schemas"]["Path"];
 export type PathReader = components["schemas"]["PathReader"];
 

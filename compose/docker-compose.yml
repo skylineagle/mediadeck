@@ -9,16 +9,12 @@ services:
       - "8888:8888" # HLS
       - "8889:8889" # WebRTC
       - "9997:9997" # API
+      - "9998:9998" # Metrics
     volumes:
       - ./mediamtx.yml:/mediamtx.yml
-    # environment:
-    #   - MTX_PROTOCOLS=tcp
+    networks:
+      - monitoring
 
-  # rtsp-simple-server:
-  #   image: aler9/rtsp-simple-server
-  #   container_name: rtsp-simple-server
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8555:8554" # RTSP
-  #   volumes:
-  #     - ./rtsp-simple-server.yml:/rtsp-simple-server.yml
+networks:
+  monitoring:
+    driver: bridge

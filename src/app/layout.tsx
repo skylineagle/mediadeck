@@ -1,14 +1,15 @@
+import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
 import { MetricsPoller } from "@/components/metrics-poller";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
 import { GeistSans } from "geist/font/sans";
 import { Settings } from "lucide-react";
 import { type Metadata } from "next";
+import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 
 import "@/styles/globals.css";
-import { ThemeProvider } from "next-themes";
-import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -21,30 +22,32 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
-        <TRPCReactProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div className="container mx-auto p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Media Deck</h1>
-                <div className="flex items-center gap-2">
-                  <Link href="/settings">
-                    <Settings />
-                  </Link>
-                  <AnimatedThemeToggle />
+      <body className="h-screen">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <TRPCReactProvider>
+              <div className="container mx-auto h-full p-6">
+                <div className="mb-6 flex items-center justify-between">
+                  <h1 className="text-3xl font-bold">Media Deck</h1>
+                  <div className="flex items-center gap-2">
+                    <Link href="/settings">
+                      <Settings />
+                    </Link>
+                    <AnimatedThemeToggle />
+                  </div>
                 </div>
+                {children}
+                <MetricsPoller />
               </div>
-              {children}
-              <MetricsPoller />
-            </div>
-          </ThemeProvider>
-        </TRPCReactProvider>
-        <Toaster />
+            </TRPCReactProvider>
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -46,7 +46,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="paths">
+      <TabsContent value="paths" className="h-full">
         <Suspense fallback={<div>Loading paths...</div>}>
           <Paths />
         </Suspense>

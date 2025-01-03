@@ -18,10 +18,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Path, PathConfig } from "@/lib/types";
-import { isPathActive, isPathSynced } from "@/lib/utils";
+import { isPathSynced } from "@/lib/utils";
 import type { Path as DBPath } from "@/server/db/types";
-import { api } from "@/trpc/server";
-import { Check, CirclePlay, Database, Power, X } from "lucide-react";
+import { Check, Database, X } from "lucide-react";
 import Link from "next/link";
 
 export type InactivePathsProps = {
@@ -82,10 +81,6 @@ export async function InactivePaths({
               <TableBody>
                 {inactivePaths.map((path) => {
                   const isSynced = isPathSynced(path.name ?? "", paths ?? []);
-                  const isActive = isPathActive(
-                    path.name ?? "",
-                    activePaths ?? [],
-                  );
 
                   return (
                     <TableRow

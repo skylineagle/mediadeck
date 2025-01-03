@@ -47,6 +47,6 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ["src/lib/mediamtx-api.d.ts"],
+  ignorePatterns: ["src/lib/mediamtx-api.d.ts", "src/components/ui"],
 };
 module.exports = config;

@@ -7,6 +7,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 import "@/styles/globals.css";
+import { ThemeProvider } from "next-themes";
+import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -21,16 +23,26 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          <div className="container mx-auto p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h1 className="text-3xl font-bold">Media Deck</h1>
-              <Link href="/settings">
-                <Settings />
-              </Link>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="container mx-auto p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-3xl font-bold">Media Deck</h1>
+                <div className="flex items-center gap-2">
+                  <Link href="/settings">
+                    <Settings />
+                  </Link>
+                  <AnimatedThemeToggle />
+                </div>
+              </div>
+              {children}
+              <MetricsPoller />
             </div>
-            {children}
-            <MetricsPoller />
-          </div>
+          </ThemeProvider>
         </TRPCReactProvider>
         <Toaster />
       </body>

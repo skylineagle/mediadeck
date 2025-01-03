@@ -1,4 +1,4 @@
-import { Paths } from "@/app/(dashboard)/_components/paths";
+import { Paths } from "@/app/(dashboard)/_components/paths/paths";
 import { Publishers } from "@/app/(dashboard)/_components/publishers";
 import { Sessions } from "@/app/(dashboard)/_components/sessions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

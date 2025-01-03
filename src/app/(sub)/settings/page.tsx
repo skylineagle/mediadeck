@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useSettings } from "@/hooks/use-settings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,10 +25,7 @@ const formSchema = z.object({
 });
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useLocalStorage("app-settings", {
-    mediaMtxUrl: "http://localhost:9997",
-    refreshInterval: 5000,
-  });
+  const { settings, setSettings } = useSettings();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

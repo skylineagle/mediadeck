@@ -1,6 +1,6 @@
 "use client";
 
-import { useMetricsStore } from "@/lib/stores/metrics";
+import { useSettings } from "@/hooks/use-settings";
 import type { Path } from "@/lib/types";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
@@ -59,9 +59,10 @@ function getPathState(pathState: Path): StatusType {
 }
 
 export const PathStatus: React.FC<LiveIconProps> = ({ path }) => {
+  const { settings } = useSettings();
   const { data: pathState } = api.path.getPathState.useQuery(
     { name: path },
-    { throwOnError: false, refetchInterval: 500 },
+    { throwOnError: false, refetchInterval: settings.refreshInterval },
   );
 
   if (!pathState) {

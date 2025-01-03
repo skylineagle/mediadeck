@@ -691,6 +691,8 @@ paths:
   # example:
   # my_camera:
   #   source: rtsp://my_camera
+  not_synced:
+    source: udp://localhost:12345
 
   # Settings under path "all_others" are applied to all paths that
   # do not match another entry.

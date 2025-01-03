@@ -8,3 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function isPathSynced(path: string, paths: { name: string }[]) {
   return paths.some((p) => p.name === path);
 }
+
+export function isPathActive(path: string, paths: { name?: string }[]) {
+  return paths.some((p) => p?.name === path);
+}

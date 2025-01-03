@@ -60,38 +60,37 @@ export const pathRouter = createTRPCRouter({
   remove: publicProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Remove from MediaMTX
+      // Get path data from database
+      const pathData = await ctx.db.query.paths.findFirst({
+        where: eq(paths.name, input.name),
+      });
+
+      if (!pathData) throw new Error("Path not found");
+
+      // Check if path exists on MediaMTX
+
       try {
-        // Remove from MediaMTX
-        // Get path data from database
-        const pathData = await ctx.db.query.paths.findFirst({
-          where: eq(paths.name, input.name),
-        });
-
-        if (!pathData) throw new Error("Path not found");
-
-        // Check if path exists on MediaMTX
-
         const response = await ky.get(
           `http://localhost:9997/v3/config/paths/get/${input.name}`,
         );
 
         if (response.status === 200) {
-          await ky
-            .delete(
-              `http://localhost:9997/v3/config/paths/delete/${input.name}`,
-            )
-            .json();
+          await ky.delete(
+            `http://localhost:9997/v3/config/paths/delete/${input.name}`,
+          );
         }
-
-        // Remove from database
-        await ctx.db.delete(paths).where(eq(paths.name, input.name));
-
-        revalidatePath("/");
-        return { success: true };
       } catch (error) {
-        console.error("Error removing path:", error);
-        throw error;
+        if (!(error instanceof HTTPError && error.response.status === 404)) {
+          throw error;
+        }
       }
+
+      // Remove from database
+      await ctx.db.delete(paths).where(eq(paths.name, input.name));
+
+      revalidatePath("/");
+      return { success: true };
     }),
 
   toggle: publicProcedure
@@ -141,7 +140,7 @@ export const pathRouter = createTRPCRouter({
       .get<PathsConfigsResponse>("http://localhost:9997/v3/config/paths/list")
       .json();
 
-    return response.items ?? [];
+    return response?.items?.filter((path) => path.name !== "all_others") ?? [];
   }),
 
   listPaths: publicProcedure.query(async () => {
@@ -149,7 +148,7 @@ export const pathRouter = createTRPCRouter({
       .get<PathsResponse>("http://localhost:9997/v3/paths/list")
       .json();
 
-    return response.items ?? [];
+    return response?.items?.filter((path) => path.name !== "all_others") ?? [];
   }),
 
   listPublishers: publicProcedure.query(async () => {

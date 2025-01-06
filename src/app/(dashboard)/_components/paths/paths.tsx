@@ -21,15 +21,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { useSettings } from "@/hooks/use-settings";
-import type { PathConfig } from "@/lib/types";
 import { isPathSynced } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Check, Database, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RemovePath } from "../remove-path";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 
 type CombinedPath = {
   name: string;
@@ -41,28 +40,15 @@ type CombinedPath = {
 };
 
 type PathsProps = {
-  paths: Array<{
-    id: number;
-    name: string;
-    source: string | null;
-    sourceOnDemand: boolean | null;
-    sourceOnDemandStartTimeout: string | null;
-    sourceOnDemandCloseAfter: string | null;
-    fallback: string | null;
-    record: boolean | null;
-    recordPath: string | null;
-    recordFormat: string | null;
-    createdAt: Date;
-    updatedAt: Date | null;
-  }>;
-  configPaths: PathConfig[];
+  paths: CombinedPath[];
+  configPaths: CombinedPath[];
 };
 
 export function Paths({ paths, configPaths }: PathsProps) {
   const { mtxUrl } = useMediaMtxUrl();
   const { settings } = useSettings();
   const router = useRouter();
-  const { data: activePaths = [] } = api.path.listPaths.useQuery(
+  const { data: activePaths = [], refetch } = api.path.listPaths.useQuery(
     { mtxUrl },
     {
       refetchInterval: settings.refreshInterval,
@@ -81,32 +67,13 @@ export function Paths({ paths, configPaths }: PathsProps) {
 
   // Combine all paths
   const allPaths: CombinedPath[] = [
-    ...activePaths.map((path) => ({
-      name: path.name ?? "",
-      source: { type: path.source?.type ?? null },
-      record: false,
-      isActive: true,
-    })),
-    ...paths
-      .filter((path) => !activePaths.some((ap) => ap.name === path.name))
-      .map((path) => ({
-        name: path.name ?? "",
-        source: { type: path.source ?? null },
-        record: path.record ?? false,
-        isActive: false,
-      })),
-    ...configPaths
-      .filter(
-        (path) =>
-          !activePaths.some((ap) => ap.name === path.name) &&
-          !paths.some((p) => p.name === path.name),
-      )
-      .map((path) => ({
-        name: path.name ?? "",
-        source: { type: path.source ?? null },
-        record: false,
-        isActive: false,
-      })),
+    ...activePaths,
+    ...paths.filter((path) => !activePaths.some((ap) => ap.name === path.name)),
+    ...configPaths.filter(
+      (path) =>
+        !activePaths.some((ap) => ap.name === path.name) &&
+        !paths.some((p) => p.name === path.name),
+    ),
   ];
 
   return (
@@ -192,6 +159,7 @@ export function Paths({ paths, configPaths }: PathsProps) {
                       </TableCell>
                       <TableCell key="actions" className="w-[200px]">
                         <div className="flex items-center gap-2">
+                          <StreamLink name={path.name} />
                           {!isSession && !isSynced && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -211,11 +179,11 @@ export function Paths({ paths, configPaths }: PathsProps) {
                               </TooltipContent>
                             </Tooltip>
                           )}
-                          <StreamLink name={path.name} />
                           {!isSession && isSynced && (
                             <TogglePath
                               name={path.name}
                               isActive={path.isActive}
+                              onToggle={refetch}
                             />
                           )}
                           {!isSession && isSynced && (

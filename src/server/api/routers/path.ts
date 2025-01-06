@@ -24,9 +24,16 @@ const withMtxUrl = z.object({
 
 export const pathRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.paths.findMany({
+    const paths = await ctx.db.query.paths.findMany({
       orderBy: (paths, { asc }) => [asc(paths.name)],
     });
+
+    return paths.map((path) => ({
+      name: path.name ?? "",
+      source: { type: path.source ?? null },
+      record: path.record ?? false,
+      isActive: false,
+    }));
   }),
 
   create: publicProcedure
@@ -148,9 +155,15 @@ export const pathRouter = createTRPCRouter({
         .get<PathsConfigsResponse>(`${input.mtxUrl}/v3/config/paths/list`)
         .json();
 
-      return (
-        response?.items?.filter((path) => path.name !== "all_others") ?? []
-      );
+      const relevantPaths =
+        response?.items?.filter((path) => path.name !== "all_others") ?? [];
+
+      return relevantPaths.map((path) => ({
+        name: path.name ?? "",
+        source: { type: path.source ?? null },
+        record: false,
+        isActive: false,
+      }));
     }),
 
   listPaths: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
@@ -158,7 +171,15 @@ export const pathRouter = createTRPCRouter({
       .get<PathsResponse>(`${input.mtxUrl}/v3/paths/list`)
       .json();
 
-    return response?.items?.filter((path) => path.name !== "all_others") ?? [];
+    const relevantPaths =
+      response?.items?.filter((path) => path.name !== "all_others") ?? [];
+
+    return relevantPaths.map((path) => ({
+      name: path.name ?? "",
+      source: { type: path.source?.type ?? null },
+      record: false,
+      isActive: true,
+    }));
   }),
 
   listPublishers: publicProcedure.input(withMtxUrl).query(async ({ input }) => {

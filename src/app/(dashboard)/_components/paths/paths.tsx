@@ -93,6 +93,15 @@ export function Paths() {
           const b = rowB.original.name;
           return a.localeCompare(b);
         },
+        cell: ({ row }) => {
+          const path = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <span>{path.name}</span>
+              <StreamLink name={path.name} />
+            </div>
+          );
+        },
         filterFn: (row, id, value) => {
           return row
             .getValue<string>("name")
@@ -190,7 +199,6 @@ export function Paths() {
 
           return (
             <div className="flex items-center gap-2">
-              <StreamLink name={path.name} />
               {!isSession && !isSynced && (
                 <Tooltip>
                   <TooltipTrigger asChild>

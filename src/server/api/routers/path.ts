@@ -18,6 +18,10 @@ const pathSchema = z.object({
   recordFormat: z.string().optional(),
 });
 
+const withMtxUrl = z.object({
+  mtxUrl: z.string().url(),
+});
+
 export const pathRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.query.paths.findMany({
@@ -25,27 +29,30 @@ export const pathRouter = createTRPCRouter({
     });
   }),
 
-  create: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
-    try {
-      // Add to Media MTX
-      await ky
-        .post(`http://localhost:9997/v3/config/paths/add/${input.name}`, {
-          json: input,
-        })
-        .json();
+  create: publicProcedure
+    .input(pathSchema.merge(withMtxUrl))
+    .mutation(async ({ ctx, input }) => {
+      const { mtxUrl, ...pathData } = input;
+      try {
+        // Add to Media MTX
+        await ky
+          .post(`${mtxUrl}/v3/config/paths/add/${pathData.name}`, {
+            json: pathData,
+          })
+          .json();
 
-      // Add to database
-      await ctx.db.insert(paths).values({
-        ...input,
-      });
+        // Add to database
+        await ctx.db.insert(paths).values({
+          ...pathData,
+        });
 
-      revalidatePath("/");
-      return { success: true };
-    } catch (error) {
-      console.error("Error creating path:", error);
-      throw error;
-    }
-  }),
+        revalidatePath("/");
+        return { success: true };
+      } catch (error) {
+        console.error("Error creating path:", error);
+        throw error;
+      }
+    }),
 
   sync: publicProcedure
     .input(z.object({ name: z.string() }))
@@ -58,27 +65,23 @@ export const pathRouter = createTRPCRouter({
     }),
 
   remove: publicProcedure
-    .input(z.object({ name: z.string() }))
+    .input(z.object({ name: z.string() }).merge(withMtxUrl))
     .mutation(async ({ ctx, input }) => {
+      const { mtxUrl, name } = input;
       // Remove from MediaMTX
       // Get path data from database
       const pathData = await ctx.db.query.paths.findFirst({
-        where: eq(paths.name, input.name),
+        where: eq(paths.name, name),
       });
 
       if (!pathData) throw new Error("Path not found");
 
       // Check if path exists on MediaMTX
-
       try {
-        const response = await ky.get(
-          `http://localhost:9997/v3/config/paths/get/${input.name}`,
-        );
+        const response = await ky.get(`${mtxUrl}/v3/config/paths/get/${name}`);
 
         if (response.status === 200) {
-          await ky.delete(
-            `http://localhost:9997/v3/config/paths/delete/${input.name}`,
-          );
+          await ky.delete(`${mtxUrl}/v3/config/paths/delete/${name}`);
         }
       } catch (error) {
         if (!(error instanceof HTTPError && error.response.status === 404)) {
@@ -87,20 +90,23 @@ export const pathRouter = createTRPCRouter({
       }
 
       // Remove from database
-      await ctx.db.delete(paths).where(eq(paths.name, input.name));
+      await ctx.db.delete(paths).where(eq(paths.name, name));
 
       revalidatePath("/");
       return { success: true };
     }),
 
   toggle: publicProcedure
-    .input(z.object({ name: z.string(), enabled: z.boolean() }))
+    .input(
+      z.object({ name: z.string(), enabled: z.boolean() }).merge(withMtxUrl),
+    )
     .mutation(async ({ ctx, input }) => {
+      const { mtxUrl, name, enabled } = input;
       // Update MediaMTX
-      if (input.enabled) {
+      if (enabled) {
         // Get path data from database
         const pathData = await ctx.db.query.paths.findFirst({
-          where: eq(paths.name, input.name),
+          where: eq(paths.name, name),
         });
 
         if (!pathData) throw new Error("Path not found");
@@ -111,7 +117,7 @@ export const pathRouter = createTRPCRouter({
 
         // Add to MediaMTX
         const response = await ky.post(
-          `http://localhost:9997/v3/config/paths/add/${info.name}`,
+          `${mtxUrl}/v3/config/paths/add/${info.name}`,
           {
             json: info,
           },
@@ -123,7 +129,7 @@ export const pathRouter = createTRPCRouter({
       } else {
         // Remove from MediaMTX
         const response = await ky.delete(
-          `http://localhost:9997/v3/config/paths/delete/${input.name}`,
+          `${mtxUrl}/v3/config/paths/delete/${name}`,
         );
 
         if (!response.ok) {
@@ -135,26 +141,28 @@ export const pathRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  listPathsConfigs: publicProcedure.query(async () => {
+  listPathsConfigs: publicProcedure
+    .input(withMtxUrl)
+    .query(async ({ input }) => {
+      const response = await ky
+        .get<PathsConfigsResponse>(`${input.mtxUrl}/v3/config/paths/list`)
+        .json();
+
+      return (
+        response?.items?.filter((path) => path.name !== "all_others") ?? []
+      );
+    }),
+
+  listPaths: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
     const response = await ky
-      .get<PathsConfigsResponse>("http://localhost:9997/v3/config/paths/list")
+      .get<PathsResponse>(`${input.mtxUrl}/v3/paths/list`)
       .json();
 
     return response?.items?.filter((path) => path.name !== "all_others") ?? [];
   }),
 
-  listPaths: publicProcedure.query(async () => {
-    const response = await ky
-      .get<PathsResponse>("http://localhost:9997/v3/paths/list")
-      .json();
-
-    return response?.items?.filter((path) => path.name !== "all_others") ?? [];
-  }),
-
-  listPublishers: publicProcedure.query(async () => {
-    const paths = await ky
-      .get<Path[]>(`${process.env.NEXT_PUBLIC_MEDIAMTX_API_URL}/v3/paths/list`)
-      .json();
+  listPublishers: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
+    const paths = await ky.get<Path[]>(`${input.mtxUrl}/v3/paths/list`).json();
 
     const publisherPaths = paths?.filter((path) => {
       if (!path.source) return false;
@@ -171,11 +179,12 @@ export const pathRouter = createTRPCRouter({
   }),
 
   getPathState: publicProcedure
-    .input(z.object({ name: z.string() }))
+    .input(z.object({ name: z.string() }).merge(withMtxUrl))
     .query(async ({ input }) => {
+      const { mtxUrl, name } = input;
       try {
         const path = await ky
-          .get<Path>(`http://localhost:9997/v3/paths/get/${input.name}`)
+          .get<Path>(`${mtxUrl}/v3/paths/get/${name}`)
           .json();
 
         return path;
@@ -188,4 +197,13 @@ export const pathRouter = createTRPCRouter({
         throw error;
       }
     }),
+
+  healthcheck: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
+    try {
+      await ky.get(`${input.mtxUrl}/v3/paths/list`).json();
+      return { isConnected: true };
+    } catch {
+      return { isConnected: false };
+    }
+  }),
 });

@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { api } from "@/trpc/react";
 import { Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ export type RemovePathProps = {
 };
 
 export function RemovePath({ pathToDelete }: RemovePathProps) {
+  const { mtxUrl } = useMediaMtxUrl();
   const router = useRouter();
   const { mutate: removePath } = api.path.remove.useMutation({
     onSuccess: () => {
@@ -36,7 +38,7 @@ export function RemovePath({ pathToDelete }: RemovePathProps) {
 
   const handleRemove = () => {
     if (pathToDelete) {
-      removePath({ name: pathToDelete });
+      removePath({ mtxUrl, name: pathToDelete });
     }
   };
 
@@ -51,8 +53,7 @@ export function RemovePath({ pathToDelete }: RemovePathProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This will remove this path from the media server and the db.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

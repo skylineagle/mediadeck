@@ -2,6 +2,8 @@ import { Paths } from "@/app/(dashboard)/_components/paths/paths";
 import { Publishers } from "@/app/(dashboard)/_components/publishers";
 import { Sessions } from "@/app/(dashboard)/_components/sessions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { env } from "@/env";
+import { api } from "@/trpc/server";
 import Link from "next/link";
 import {
   createSearchParamsCache,
@@ -12,6 +14,7 @@ import { Suspense } from "react";
 
 export const searchParamsCache = createSearchParamsCache({
   tab: parseAsString.withDefault("paths"),
+  mtxUrl: parseAsString.withDefault(env.NEXT_PUBLIC_MEDIAMTX_API_URL),
 });
 
 type PageProps = {
@@ -19,7 +22,9 @@ type PageProps = {
 };
 
 export default async function Dashboard({ searchParams }: PageProps) {
-  const { tab } = await searchParamsCache.parse(searchParams);
+  const { tab, mtxUrl } = await searchParamsCache.parse(searchParams);
+  const paths = await api.path.getAll();
+  const configPaths = await api.path.listPathsConfigs({ mtxUrl });
 
   return (
     <Tabs value={tab} defaultValue={"paths"}>
@@ -48,7 +53,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
 
       <TabsContent value="paths" className="h-full">
         <Suspense fallback={<div>Loading paths...</div>}>
-          <Paths />
+          <Paths paths={paths} configPaths={configPaths} />
         </Suspense>
       </TabsContent>
 

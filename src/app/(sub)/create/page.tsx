@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import type { RouterInputs } from "@/trpc/react";
 import { TRPCClientError } from "@trpc/client";
+import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 
 type CreatePath = RouterInputs["path"]["create"];
 
@@ -36,6 +37,7 @@ const formSchema = z.object({
 }) satisfies z.ZodType<CreatePath>;
 
 export default function CreatePathForm() {
+  const { mtxUrl } = useMediaMtxUrl();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,7 +64,7 @@ export default function CreatePathForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    mutate(values);
+    mutate({ mtxUrl, ...values });
   }
 
   return (

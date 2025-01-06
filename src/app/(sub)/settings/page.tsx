@@ -1,94 +1,79 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { env } from "@/env";
 import { useSettings } from "@/hooks/use-settings";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-const formSchema = z.object({
-  mediaMtxUrl: z.string().url("Please enter a valid URL"),
-  refreshInterval: z
-    .number()
-    .min(1000, "Minimum refresh interval is 1000ms")
-    .max(60000, "Maximum refresh interval is 60000ms"),
-});
+import { Label } from "@radix-ui/react-label";
+import { parseAsString, useQueryState } from "nuqs";
 
 export default function SettingsPage() {
+  const [mtxUrl, setMtxUrl] = useQueryState(
+    "mtx-url",
+    parseAsString.withDefault(env.NEXT_PUBLIC_MEDIAMTX_API_URL),
+  );
   const { settings, setSettings } = useSettings();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: settings,
-  });
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setSettings(values);
-  }
+  const handleUrlChange = (url: string) => {
+    setMtxUrl(url);
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Configure your application settings
         </p>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="mediaMtxUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>MediaMTX URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="http://localhost:9997" {...field} />
-                </FormControl>
-                <FormDescription>
-                  The URL of your MediaMTX server
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="space-y-4">
+        {/* <FormItem>
+          <FormLabel>MediaMTX URL</FormLabel>
 
-          <FormField
-            control={form.control}
-            name="refreshInterval"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Refresh Interval (ms)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="5000"
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
-                  />
-                </FormControl>
-                <FormDescription>
-                  How often to refresh the session data (in milliseconds)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <Input
+              placeholder="http://localhost:9997"
+              value={mtxUrl}
+              onChange={(e) => handleUrlChange(e.target.value)}
+            />
+          </FormControl>
+          <FormDescription>The URL of your MediaMTX server</FormDescription>
+          <FormMessage />
+        </FormItem> */}
 
-          <Button type="submit">Save Settings</Button>
-        </form>
-      </Form>
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label htmlFor="mtx-url">MediaMTX URL</Label>
+          <Input
+            id="mtx-url"
+            placeholder="http://localhost:9997"
+            value={mtxUrl}
+            onChange={(e) => handleUrlChange(e.target.value)}
+          />
+          <Label className="text-xs text-muted-foreground">
+            The URL of your MediaMTX server
+          </Label>
+        </div>
+
+        <div className="grid w-full max-w-sm items-center gap-1.5">
+          <Label htmlFor="refresh-interval">Refresh Interval (ms)</Label>
+          <Input
+            id="refresh-interval"
+            type="number"
+            placeholder="5000"
+            value={settings.refreshInterval}
+            onChange={(e) =>
+              setSettings((prev) => ({
+                ...prev,
+                refreshInterval: parseInt(e.target.value),
+              }))
+            }
+          />
+          <Label className="text-xs text-muted-foreground">
+            How often to refresh the session data (in milliseconds)
+          </Label>
+        </div>
+
+        {/* <Button type="submit">Save Settings</Button> */}
+      </div>
     </div>
   );
 }

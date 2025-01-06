@@ -1,12 +1,16 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { cn } from "@/lib/utils";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react";
 import { Power } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface TogglePathProps {
   name: string;
@@ -14,6 +18,14 @@ interface TogglePathProps {
 }
 
 export function TogglePath({ name, isActive }: TogglePathProps) {
+  const { mtxUrl } = useMediaMtxUrl();
+  const router = useRouter();
+  const { mutate: togglePath } = api.path.toggle.useMutation({
+    onSuccess: () => {
+      router.refresh();
+    },
+  });
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -24,10 +36,10 @@ export function TogglePath({ name, isActive }: TogglePathProps) {
             isActive && "bg-red-500 text-white hover:bg-red-600",
           )}
           size="icon"
-          onClick={async () => {
-            "use server";
-            await api.path.toggle({
+          onClick={() => {
+            togglePath({
               name,
+              mtxUrl,
               enabled: !isActive,
             });
           }}

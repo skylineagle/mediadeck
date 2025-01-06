@@ -8,6 +8,7 @@ import { Settings } from "lucide-react";
 import { type Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "@/styles/globals.css";
 
@@ -30,21 +31,24 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <TRPCReactProvider>
-              <div className="container mx-auto h-full p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <h1 className="text-3xl font-bold">Media Deck</h1>
-                  <div className="flex items-center gap-2">
-                    <Link href="/settings">
-                      <Settings />
-                    </Link>
-                    <AnimatedThemeToggle />
+            <NuqsAdapter>
+              <TRPCReactProvider>
+                <div className="container mx-auto h-full p-6">
+                  <div className="mb-6 flex items-center justify-between">
+                    <h1 className="text-3xl font-bold">Media Deck</h1>
+
+                    <div className="flex items-center gap-2">
+                      <Link href="/settings">
+                        <Settings />
+                      </Link>
+                      <AnimatedThemeToggle />
+                    </div>
                   </div>
+                  {children}
+                  <MetricsPoller />
                 </div>
-                {children}
-                <MetricsPoller />
-              </div>
-            </TRPCReactProvider>
+              </TRPCReactProvider>
+            </NuqsAdapter>
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>

@@ -1,3 +1,5 @@
+"use client";
+
 import { PathStatus } from "@/components/path-status";
 import { StreamLink } from "@/components/stream-link";
 import { TogglePath } from "@/components/toggle-path";
@@ -19,37 +21,68 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSettings } from "@/hooks/use-settings";
+import type { PathConfig } from "@/lib/types";
 import { isPathSynced } from "@/lib/utils";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react";
 import { Check, Database, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { RemovePath } from "../remove-path";
+import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 
 type CombinedPath = {
-  name?: string;
+  name: string;
   source?: {
-    type?: string | null;
+    type: string | null;
   };
-  record?: boolean;
+  record: boolean;
   isActive: boolean;
 };
 
-export async function Paths() {
-  const paths = await api.path.getAll();
-  const configPaths = await api.path.listPathsConfigs();
-  const activePaths = await api.path.listPaths();
+type PathsProps = {
+  paths: Array<{
+    id: number;
+    name: string;
+    source: string | null;
+    sourceOnDemand: boolean | null;
+    sourceOnDemandStartTimeout: string | null;
+    sourceOnDemandCloseAfter: string | null;
+    fallback: string | null;
+    record: boolean | null;
+    recordPath: string | null;
+    recordFormat: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+  }>;
+  configPaths: PathConfig[];
+};
 
-  const handleSync = async (name: string) => {
-    "use server";
-    await api.path.sync({
-      name,
-    });
+export function Paths({ paths, configPaths }: PathsProps) {
+  const { mtxUrl } = useMediaMtxUrl();
+  const { settings } = useSettings();
+  const router = useRouter();
+  const { data: activePaths = [] } = api.path.listPaths.useQuery(
+    { mtxUrl },
+    {
+      refetchInterval: settings.refreshInterval,
+    },
+  );
+  const { mutate: syncPath } = api.path.sync.useMutation({
+    onSuccess: () => {
+      router.refresh();
+    },
+  });
+
+  const handleSync = (name: string) => (e: React.FormEvent) => {
+    e.preventDefault();
+    syncPath({ name });
   };
 
   // Combine all paths
   const allPaths: CombinedPath[] = [
     ...activePaths.map((path) => ({
-      name: path.name,
+      name: path.name ?? "",
       source: { type: path.source?.type ?? null },
       record: false,
       isActive: true,
@@ -57,7 +90,7 @@ export async function Paths() {
     ...paths
       .filter((path) => !activePaths.some((ap) => ap.name === path.name))
       .map((path) => ({
-        name: path.name,
+        name: path.name ?? "",
         source: { type: path.source ?? null },
         record: path.record ?? false,
         isActive: false,
@@ -69,7 +102,7 @@ export async function Paths() {
           !paths.some((p) => p.name === path.name),
       )
       .map((path) => ({
-        name: path.name,
+        name: path.name ?? "",
         source: { type: path.source ?? null },
         record: false,
         isActive: false,
@@ -114,7 +147,7 @@ export async function Paths() {
                 {allPaths.map((path) => {
                   const isSession =
                     path.source?.type?.endsWith("Session") ?? false;
-                  const isSynced = isPathSynced(path.name ?? "", paths ?? []);
+                  const isSynced = isPathSynced(path.name, paths);
 
                   return (
                     <TableRow
@@ -152,7 +185,7 @@ export async function Paths() {
                       </TableCell>
                       <TableCell key="status" className="w-[100px]">
                         {path.isActive ? (
-                          <PathStatus path={path.name ?? ""} />
+                          <PathStatus path={path.name} />
                         ) : (
                           <Badge variant="secondary">Inactive</Badge>
                         )}
@@ -162,12 +195,7 @@ export async function Paths() {
                           {!isSession && !isSynced && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <form
-                                  action={handleSync.bind(
-                                    null,
-                                    path.name ?? "",
-                                  )}
-                                >
+                                <form onSubmit={handleSync(path.name)}>
                                   <Button
                                     variant="outline"
                                     type="submit"
@@ -183,15 +211,15 @@ export async function Paths() {
                               </TooltipContent>
                             </Tooltip>
                           )}
-                          {path.name && <StreamLink name={path.name} />}
+                          <StreamLink name={path.name} />
                           {!isSession && isSynced && (
                             <TogglePath
-                              name={path.name ?? ""}
+                              name={path.name}
                               isActive={path.isActive}
                             />
                           )}
                           {!isSession && isSynced && (
-                            <RemovePath pathToDelete={path.name ?? ""} />
+                            <RemovePath pathToDelete={path.name} />
                           )}
                         </div>
                       </TableCell>

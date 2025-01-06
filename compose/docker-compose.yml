@@ -1,11 +1,31 @@
 services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik
+    networks:
+      - monitoring
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
   mediamtx:
     image: bluenviron/mediamtx:1.10.0
     container_name: mediamtx
     restart: unless-stopped
     ports:
-      - "8554:8554" # RTSx  P
-      - "5555:5555" # udp stream
+      - "8554:8554" # RTSP
+      - "5555:5555" # UDP stream
       - "8888:8888" # HLS
       - "8889:8889" # WebRTC
       - "9997:9997" # API
@@ -13,7 +33,23 @@ services:
     volumes:
       - ./mediamtx.yml:/mediamtx.yml
     networks:
-      - monitoring
+      monitoring:
+        aliases:
+          - mediamtx.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mediamtx-api.rule=Host(`api.mediamtx.local`)"
+      - "traefik.http.routers.mediamtx-api.service=mediamtx-api"
+      - "traefik.http.services.mediamtx-api.loadbalancer.server.port=9997"
+      - "traefik.http.routers.mediamtx-metrics.rule=Host(`metrics.mediamtx.local`)"
+      - "traefik.http.routers.mediamtx-metrics.service=mediamtx-metrics"
+      - "traefik.http.services.mediamtx-metrics.loadbalancer.server.port=9998"
+      - "traefik.http.routers.mediamtx-hls.rule=Host(`hls.mediamtx.local`)"
+      - "traefik.http.routers.mediamtx-hls.service=mediamtx-hls"
+      - "traefik.http.services.mediamtx-hls.loadbalancer.server.port=8888"
+      - "traefik.http.routers.mediamtx-webrtc.rule=Host(`webrtc.mediamtx.local`)"
+      - "traefik.http.routers.mediamtx-webrtc.service=mediamtx-webrtc"
+      - "traefik.http.services.mediamtx-webrtc.loadbalancer.server.port=8889"
 
 networks:
   monitoring:

@@ -47,6 +47,11 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ["src/lib/mediamtx-api.d.ts", "src/components/ui"],
+  ignorePatterns: [
+    "src/lib/mediamtx-api.d.ts",
+    "src/components/ui",
+    "src/components/data-table",
+    "src/hooks/use-data-table.ts",
+  ],
 };
 module.exports = config;

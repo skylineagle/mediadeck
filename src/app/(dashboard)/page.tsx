@@ -3,7 +3,6 @@ import { Publishers } from "@/app/(dashboard)/_components/publishers";
 import { Sessions } from "@/app/(dashboard)/_components/sessions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { env } from "@/env";
-import { api } from "@/trpc/server";
 import Link from "next/link";
 import {
   createSearchParamsCache,
@@ -22,9 +21,9 @@ type PageProps = {
 };
 
 export default async function Dashboard({ searchParams }: PageProps) {
-  const { tab, mtxUrl } = await searchParamsCache.parse(searchParams);
-  const paths = await api.path.getAll();
-  const configPaths = await api.path.listPathsConfigs({ mtxUrl });
+  const { tab } = await searchParamsCache.parse(searchParams);
+  // const paths = await api.path.getSavedPaths();
+  // const configPaths = await api.path.listPathsConfigs({ mtxUrl });
 
   return (
     <Tabs value={tab} defaultValue={"paths"}>
@@ -53,7 +52,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
 
       <TabsContent value="paths" className="h-full">
         <Suspense fallback={<div>Loading paths...</div>}>
-          <Paths paths={paths} configPaths={configPaths} />
+          <Paths />
         </Suspense>
       </TabsContent>
 

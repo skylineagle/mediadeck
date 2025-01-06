@@ -1,10 +1,11 @@
-import type { Path, PathsConfigsResponse, PathsResponse } from "@/lib/types";
+import type { Path } from "@/lib/types";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import ky, { HTTPError } from "ky";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getPathConfigs, listActivePaths, parseDbPaths } from "./utils";
 
 const pathSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -23,18 +24,28 @@ const withMtxUrl = z.object({
 });
 
 export const pathRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const paths = await ctx.db.query.paths.findMany({
-      orderBy: (paths, { asc }) => [asc(paths.name)],
-    });
+  getAllPaths: publicProcedure
+    .input(withMtxUrl)
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.paths.findMany({
+        orderBy: (paths, { asc }) => [asc(paths.name)],
+      });
 
-    return paths.map((path) => ({
-      name: path.name ?? "",
-      source: { type: path.source ?? null },
-      record: path.record ?? false,
-      isActive: false,
-    }));
-  }),
+      const dbPaths = parseDbPaths(result);
+      const pathConfigs = await getPathConfigs(input.mtxUrl);
+      const activePaths = await listActivePaths(input.mtxUrl);
+      return [
+        ...activePaths,
+        ...dbPaths.filter(
+          (path) => !activePaths.some((ap) => ap.name === path.name),
+        ),
+        ...pathConfigs.filter(
+          (path) =>
+            !activePaths.some((ap) => ap.name === path.name) &&
+            !dbPaths.some((p) => p.name === path.name),
+        ),
+      ];
+    }),
 
   create: publicProcedure
     .input(pathSchema.merge(withMtxUrl))
@@ -147,40 +158,6 @@ export const pathRouter = createTRPCRouter({
       revalidatePath("/");
       return { success: true };
     }),
-
-  listPathsConfigs: publicProcedure
-    .input(withMtxUrl)
-    .query(async ({ input }) => {
-      const response = await ky
-        .get<PathsConfigsResponse>(`${input.mtxUrl}/v3/config/paths/list`)
-        .json();
-
-      const relevantPaths =
-        response?.items?.filter((path) => path.name !== "all_others") ?? [];
-
-      return relevantPaths.map((path) => ({
-        name: path.name ?? "",
-        source: { type: path.source ?? null },
-        record: false,
-        isActive: false,
-      }));
-    }),
-
-  listPaths: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
-    const response = await ky
-      .get<PathsResponse>(`${input.mtxUrl}/v3/paths/list`)
-      .json();
-
-    const relevantPaths =
-      response?.items?.filter((path) => path.name !== "all_others") ?? [];
-
-    return relevantPaths.map((path) => ({
-      name: path.name ?? "",
-      source: { type: path.source?.type ?? null },
-      record: false,
-      isActive: true,
-    }));
-  }),
 
   listPublishers: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
     const paths = await ky.get<Path[]>(`${input.mtxUrl}/v3/paths/list`).json();

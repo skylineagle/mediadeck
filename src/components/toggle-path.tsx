@@ -71,7 +71,9 @@ export function TogglePath({ name, isActive, onToggle }: TogglePathProps) {
           )}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{isActive ? "Stop Path" : "Start Path"}</TooltipContent>
+      <TooltipContent>
+        {isActive ? "Stop" : "Start"} {name} Path
+      </TooltipContent>
     </Tooltip>
   );
 }

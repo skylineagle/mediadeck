@@ -11,6 +11,7 @@ import Link from "next/link";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import "@/styles/globals.css";
+import { MediaMtxStatus } from "@/components/mediamtx-status";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -35,7 +36,10 @@ export default function RootLayout({
               <TRPCReactProvider>
                 <div className="container mx-auto h-full p-6">
                   <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold">Media Deck</h1>
+                    <div className="flex items-center gap-6">
+                      <h1 className="text-3xl font-bold">Media Deck</h1>
+                      <MediaMtxStatus />
+                    </div>
 
                     <div className="flex items-center gap-2">
                       <Link href="/settings">

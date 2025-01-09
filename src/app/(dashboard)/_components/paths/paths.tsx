@@ -245,17 +245,7 @@ export function Paths() {
   return (
     <div className="mx-4">
       <div className="mb-4 flex items-center justify-between">
-        <div className="space-y-1.5">
-          <h2 className="text-2xl font-semibold tracking-tight">Paths</h2>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Database className="h-4 w-4 text-blue-400" /> Synced to DB
-            </div>
-            <div className="flex items-center gap-1">
-              <Database className="h-4 w-4 text-muted-foreground" /> Not synced
-            </div>
-          </div>
-        </div>
+        <div className="space-y-1.5" />
         <Link href="/create">
           <Button>Add Path</Button>
         </Link>

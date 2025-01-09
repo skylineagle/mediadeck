@@ -90,6 +90,21 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
+  postgres:
+    image: postgres:latest
+    container_name: mediamtx-panel-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=bgCHKMhIKNov8PaG
+      - POSTGRES_DB=mediamtx-panel
+    ports:
+      - "5432:5432"
+    networks:
+      - monitoring
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 networks:
   monitoring:
     driver: bridge
@@ -97,3 +112,4 @@ networks:
 volumes:
   traefik_data: {}
   n8n_data: {}
+  postgres_data: {}

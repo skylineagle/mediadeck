@@ -23,7 +23,7 @@ export async function getPathConfigs(mtxUrl: string) {
   return relevantPaths.map((path) => ({
     name: path.name ?? "",
     source: { type: path.source ?? null },
-    record: false,
+    record: path.record ?? false,
     isActive: false,
   }));
 }
@@ -38,7 +38,7 @@ export async function listActivePaths(mtxUrl: string) {
 
   return relevantPaths.map((path) => ({
     name: path.name ?? "",
-    source: { type: path.source?.type ?? null },
+    source: { type: null },
     record: false,
     isActive: true,
   }));

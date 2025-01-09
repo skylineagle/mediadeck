@@ -18,14 +18,14 @@ import {
 import { useDataTable } from "@/hooks/use-data-table";
 import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { useSettings } from "@/hooks/use-settings";
-import { isPathSynced } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import type { CombinedPath } from "@/types";
+import type { EnhancedPath } from "@/types";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Check, Database, RefreshCw, X } from "lucide-react";
+import { Check, Database, Pencil, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import { filterFields } from "./const";
 
 export function Paths() {
@@ -41,40 +41,41 @@ export function Paths() {
 
   const { mutate: syncPath } = api.path.sync.useMutation({
     onSuccess: () => {
+      toast.success("Path synced");
       router.refresh();
+    },
+    onError: () => {
+      toast.error("Failed to sync path");
     },
   });
 
   const handleSync = useCallback(
-    (name: string) => (e: React.FormEvent) => {
+    (path: EnhancedPath) => (e: React.FormEvent) => {
       e.preventDefault();
-      syncPath({ name });
+      syncPath({ ...path, source: path.source?.type ?? "" });
     },
     [syncPath],
   );
 
-  const columns: ColumnDef<CombinedPath>[] = useMemo(
+  const columns: ColumnDef<EnhancedPath>[] = useMemo(
     () => [
       {
-        id: "db",
+        accessorKey: "status",
         header: "DB",
         cell: ({ row }) => {
           const path = row.original;
-          const isSession = path.source?.type?.endsWith("Session") ?? false;
-          const isSynced = isPathSynced(path.name, paths);
-
-          if (isSession) return null;
+          const isInDb = path.status.isInDb;
 
           return (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Database
-                    className={`h-4 w-4 ${isSynced ? "text-blue-400" : "text-muted-foreground"}`}
+                    className={`h-4 w-4 ${isInDb ? "text-blue-400" : "text-muted-foreground"}`}
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  {isSynced ? "Synced to Database" : "Not Synced to Database"}
+                  {isInDb ? "Synced to Database" : "Not Synced to Database"}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -123,10 +124,11 @@ export function Paths() {
         },
         cell: ({ row }) => {
           const path = row.original;
-          const isSession = path.source?.type?.endsWith("Session") ?? false;
+          const isSession = Boolean(!path.source?.type);
+
           return (
             <Badge variant={isSession ? "default" : "secondary"}>
-              {isSession ? "Session" : "Proxy"}
+              {isSession ? "Session" : path.source?.type}
             </Badge>
           );
         },
@@ -150,13 +152,15 @@ export function Paths() {
         },
         cell: ({ row }) => {
           const path = row.original;
-          return path.record ? (
-            <Badge variant="secondary">
-              <Check className="h-4 w-4" />
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <X className="h-4 w-4" />
+          console.log(path);
+
+          return (
+            <Badge variant={path.record ? "default" : "secondary"}>
+              {path.record ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
             </Badge>
           );
         },
@@ -192,42 +196,58 @@ export function Paths() {
         header: "Actions",
         cell: ({ row }) => {
           const path = row.original;
-          const isSession = path.source?.type?.endsWith("Session") ?? false;
-          const isSynced = isPathSynced(path.name, paths);
+          const isInDb = path.status.isInDb;
 
           return (
-            <div className="flex items-center gap-2">
-              {!isSession && !isSynced && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <form onSubmit={handleSync(path.name)}>
-                      <Button variant="outline" type="submit" className="gap-2">
-                        <RefreshCw className="h-4 w-4" />
-                        Sync to DB
-                      </Button>
-                    </form>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Save this path into the database
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {!isSession && isSynced && (
-                <TogglePath
-                  name={path.name}
-                  isActive={path.isActive}
-                  onToggle={refetch}
-                />
-              )}
-              {!isSession && isSynced && (
-                <RemovePath pathToDelete={path.name} />
-              )}
+            <div className="grid grid-cols-4 gap-2">
+              <div key={`${path.name}-sync`}>
+                {!isInDb && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <form onSubmit={handleSync(path)}>
+                        <Button
+                          variant="outline"
+                          type="submit"
+                          className="gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          Sync to DB
+                        </Button>
+                      </form>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Save this path into the database
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              <div key={`${path.name}-edit`}>
+                {isInDb && (
+                  <Link href={`/edit/${path.name}`}>
+                    <Button variant="default" size="icon">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+              <div key={`${path.name}-toggle`}>
+                {isInDb && path.source?.type && (
+                  <TogglePath
+                    name={path.name}
+                    isActive={path.status.isActive}
+                    onToggle={refetch}
+                  />
+                )}
+              </div>
+              <div key={`${path.name}-remove`}>
+                {isInDb && <RemovePath pathToDelete={path.name} />}
+              </div>
             </div>
           );
         },
       },
     ],
-    [handleSync, paths, refetch],
+    [handleSync, refetch],
   );
 
   const { table } = useDataTable({

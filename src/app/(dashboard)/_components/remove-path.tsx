@@ -45,8 +45,8 @@ export function RemovePath({ pathToDelete }: RemovePathProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="icon">
-          <Trash className="h-4 w-4" />
+        <Button variant="ghost" size="icon">
+          <Trash className="h-4 w-4 text-destructive" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

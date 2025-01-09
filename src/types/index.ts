@@ -70,3 +70,10 @@ export type CombinedPath = {
   record: boolean;
   isActive: boolean;
 };
+
+export type EnhancedPath = CombinedPath & {
+  status: {
+    isInDb: boolean;
+    isActive: boolean;
+  };
+};

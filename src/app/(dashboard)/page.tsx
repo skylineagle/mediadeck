@@ -1,7 +1,7 @@
 import { Paths } from "@/app/(dashboard)/_components/paths/paths";
+import { ConfigForm } from "@/app/(sub)/config/_components/config-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Suspense } from "react";
-import { ConfigForm } from "@/app/(sub)/config/_components/config-form";
 
 export default async function Dashboard() {
   return (

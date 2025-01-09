@@ -1,24 +1,14 @@
-import type { Path } from "@/lib/types";
+import { pathSchema } from "@/lib/schemas/config.schema";
+import type { Path, PathConfig } from "@/lib/types";
 import { withMtxUrl } from "@/lib/validators";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
+import type { EnhancedPath } from "@/types";
 import { eq } from "drizzle-orm";
 import ky, { HTTPError } from "ky";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getPathConfigs, listActivePaths, parseDbPaths } from "./utils";
-
-const pathSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  source: z.string().optional(),
-  sourceOnDemand: z.boolean().optional(),
-  sourceOnDemandStartTimeout: z.string().optional(),
-  sourceOnDemandCloseAfter: z.string().optional(),
-  fallback: z.string().optional(),
-  record: z.boolean().optional(),
-  recordPath: z.string().optional(),
-  recordFormat: z.string().optional(),
-});
 
 export const pathRouter = createTRPCRouter({
   getAllPaths: publicProcedure
@@ -31,35 +21,58 @@ export const pathRouter = createTRPCRouter({
       const dbPaths = parseDbPaths(result);
       const pathConfigs = await getPathConfigs(input.mtxUrl);
       const activePaths = await listActivePaths(input.mtxUrl);
-      return [
-        ...activePaths,
-        ...dbPaths.filter(
-          (path) => !activePaths.some((ap) => ap.name === path.name),
-        ),
-        ...pathConfigs.filter(
-          (path) =>
-            !activePaths.some((ap) => ap.name === path.name) &&
-            !dbPaths.some((p) => p.name === path.name),
-        ),
+
+      const enhancedPaths: EnhancedPath[] = [
+        ...activePaths.map((path) => ({
+          ...(pathConfigs.find((p) => p.name === path.name) ?? path),
+          status: {
+            isInDb: dbPaths.some((p) => p.name === path.name),
+            isActive: true,
+          },
+        })),
+        ...dbPaths
+          .filter((path) => !activePaths.some((ap) => ap.name === path.name))
+          .map((path) => ({
+            ...path,
+            status: {
+              isInDb: true,
+              isActive: false,
+            },
+          })),
       ];
+
+      console.log(pathConfigs.find((path) => path.name === "recorded"));
+      console.log(enhancedPaths.find((path) => path.name === "recorded"));
+
+      return enhancedPaths;
     }),
 
   create: publicProcedure
-    .input(pathSchema.merge(withMtxUrl))
+    .input(z.object({ data: pathSchema, mediamtx: withMtxUrl }))
     .mutation(async ({ ctx, input }) => {
-      const { mtxUrl, ...pathData } = input;
+      const { data, mediamtx } = input;
       try {
         // Add to Media MTX
         await ky
-          .post(`${mtxUrl}/v3/config/paths/add/${pathData.name}`, {
-            json: pathData,
+          .post(`${mediamtx.mtxUrl}/v3/config/paths/add/${data.name}`, {
+            json: data,
           })
           .json();
-        // Add to database
+        // Add to database with boolean to string conversion
+
+        // Get the created path from MediaMTX to ensure we have the latest data
+        const createdPath = await ky
+          .get<PathConfig>(
+            `${mediamtx.mtxUrl}/v3/config/paths/get/${data.name}`,
+          )
+          .json();
+
+        if (!createdPath)
+          throw new Error("Failed to get created path from MediaMTX");
+
         await ctx.db.insert(paths).values({
-          ...pathData,
-          sourceOnDemand: pathData.sourceOnDemand ? "1" : "0",
-          record: pathData.record ? "1" : "0",
+          ...createdPath,
+          name: data.name,
         });
 
         revalidatePath("/");
@@ -70,15 +83,13 @@ export const pathRouter = createTRPCRouter({
       }
     }),
 
-  sync: publicProcedure
-    .input(z.object({ name: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      // Add to database
-      await ctx.db.insert(paths).values({
-        ...input,
-      });
-      revalidatePath("/");
-    }),
+  sync: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
+    // Add to database
+    await ctx.db.insert(paths).values({
+      ...input,
+    });
+    revalidatePath("/");
+  }),
 
   remove: publicProcedure
     .input(z.object({ name: z.string() }).merge(withMtxUrl))
@@ -139,6 +150,7 @@ export const pathRouter = createTRPCRouter({
         );
 
         if (!response.ok) {
+          console.error(response);
           throw new Error("Failed to add path to MediaMTX");
         }
       } else {
@@ -195,9 +207,7 @@ export const pathRouter = createTRPCRouter({
 
   healthcheck: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
     try {
-      console.log(input.mtxUrl);
       await ky.get(`${input.mtxUrl}/v3/paths/list`).json();
-      console.log("Connected");
       return { isConnected: true };
     } catch (error) {
       console.log(error);

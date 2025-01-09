@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { MediaServerMetrics } from "../types/metrics";
+import type { MediaServerMetrics } from "@/lib/types/metrics";
 
 interface MetricsState {
   metrics: MediaServerMetrics | null;
@@ -12,8 +12,8 @@ interface MetricsState {
 }
 
 export const useMetricsStore = create<MetricsState>((set) => ({
-  metrics: null,
   lastUpdated: null,
+  metrics: null,
   isLoading: false,
   error: null,
   setMetrics: (metrics) =>

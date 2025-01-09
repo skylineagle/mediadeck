@@ -46,6 +46,17 @@ const config = {
         drizzleObjectName: ["db", "ctx.db"],
       },
     ],
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["../*"],
+            message: "Please use '@/' imports instead of relative paths",
+          },
+        ],
+      },
+    ],
   },
   ignorePatterns: [
     "src/lib/mediamtx-api.d.ts",

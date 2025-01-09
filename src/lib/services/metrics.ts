@@ -1,4 +1,4 @@
-import type { MediaServerMetrics } from "../types/metrics";
+import type { MediaServerMetrics } from "@/lib/types/metrics";
 
 function parseMetricsLine(line: string): {
   name?: string;

@@ -859,39 +859,6 @@ export function ConfigForm() {
           </div>
 
           <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Log Configuration</h2>
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label>Log Level</Label>
-                <Input
-                  value={configs?.mtxConfig?.logLevel ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("logLevel", e.target.value)
-                  }
-                  placeholder="info"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Log level (debug, info, warn, error)
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Log File</Label>
-                <Input
-                  value={configs?.mtxConfig?.logFile ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("logFile", e.target.value)
-                  }
-                  placeholder="mediamtx.log"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Path to the log file
-                </p>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </>

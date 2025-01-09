@@ -1,0 +1,525 @@
+{
+  "id": "a4725b64-564c-43d9-8081-b63b5ce4c592",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.config": {
+      "name": "config",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "config": {
+          "name": "config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.paths": {
+      "name": "paths",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_fingerprint": {
+          "name": "source_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_on_demand": {
+          "name": "source_on_demand",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_on_demand_start_timeout": {
+          "name": "source_on_demand_start_timeout",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_on_demand_close_after": {
+          "name": "source_on_demand_close_after",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_readers": {
+          "name": "max_readers",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "srt_read_passphrase": {
+          "name": "srt_read_passphrase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fallback": {
+          "name": "fallback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record": {
+          "name": "record",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record_path": {
+          "name": "record_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record_format": {
+          "name": "record_format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record_part_duration": {
+          "name": "record_part_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record_segment_duration": {
+          "name": "record_segment_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "record_delete_after": {
+          "name": "record_delete_after",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "override_publisher": {
+          "name": "override_publisher",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "srt_publish_passphrase": {
+          "name": "srt_publish_passphrase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rtsp_transport": {
+          "name": "rtsp_transport",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rtsp_any_port": {
+          "name": "rtsp_any_port",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rtsp_range_type": {
+          "name": "rtsp_range_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rtsp_range_start": {
+          "name": "rtsp_range_start",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_redirect": {
+          "name": "source_redirect",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_cam_id": {
+          "name": "rpi_camera_cam_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_width": {
+          "name": "rpi_camera_width",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_height": {
+          "name": "rpi_camera_height",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_h_flip": {
+          "name": "rpi_camera_h_flip",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_v_flip": {
+          "name": "rpi_camera_v_flip",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_brightness": {
+          "name": "rpi_camera_brightness",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_contrast": {
+          "name": "rpi_camera_contrast",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_saturation": {
+          "name": "rpi_camera_saturation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_sharpness": {
+          "name": "rpi_camera_sharpness",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_exposure": {
+          "name": "rpi_camera_exposure",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_awb": {
+          "name": "rpi_camera_awb",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_awb_gains": {
+          "name": "rpi_camera_awb_gains",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_denoise": {
+          "name": "rpi_camera_denoise",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_shutter": {
+          "name": "rpi_camera_shutter",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_metering": {
+          "name": "rpi_camera_metering",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_gain": {
+          "name": "rpi_camera_gain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_ev": {
+          "name": "rpi_camera_ev",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_roi": {
+          "name": "rpi_camera_roi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_hdr": {
+          "name": "rpi_camera_hdr",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_tuning_file": {
+          "name": "rpi_camera_tuning_file",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_mode": {
+          "name": "rpi_camera_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_fps": {
+          "name": "rpi_camera_fps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_af_mode": {
+          "name": "rpi_camera_af_mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_af_range": {
+          "name": "rpi_camera_af_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_af_speed": {
+          "name": "rpi_camera_af_speed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_lens_position": {
+          "name": "rpi_camera_lens_position",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_af_window": {
+          "name": "rpi_camera_af_window",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_flicker_period": {
+          "name": "rpi_camera_flicker_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_text_overlay_enable": {
+          "name": "rpi_camera_text_overlay_enable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_text_overlay": {
+          "name": "rpi_camera_text_overlay",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_codec": {
+          "name": "rpi_camera_codec",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_idr_period": {
+          "name": "rpi_camera_idr_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_bitrate": {
+          "name": "rpi_camera_bitrate",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_profile": {
+          "name": "rpi_camera_profile",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rpi_camera_level": {
+          "name": "rpi_camera_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_init": {
+          "name": "run_on_init",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_init_restart": {
+          "name": "run_on_init_restart",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_demand": {
+          "name": "run_on_demand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_demand_restart": {
+          "name": "run_on_demand_restart",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_demand_start_timeout": {
+          "name": "run_on_demand_start_timeout",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_demand_close_after": {
+          "name": "run_on_demand_close_after",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_undemand": {
+          "name": "run_on_undemand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_ready": {
+          "name": "run_on_ready",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_ready_restart": {
+          "name": "run_on_ready_restart",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_not_ready": {
+          "name": "run_on_not_ready",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_read": {
+          "name": "run_on_read",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_read_restart": {
+          "name": "run_on_read_restart",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_unread": {
+          "name": "run_on_unread",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_record_segment_create": {
+          "name": "run_on_record_segment_create",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "run_on_record_segment_complete": {
+          "name": "run_on_record_segment_complete",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

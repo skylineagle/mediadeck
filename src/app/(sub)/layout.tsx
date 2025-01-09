@@ -4,7 +4,7 @@ export default function SubLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-4">
       <div className="mx-auto max-w-2xl space-y-8">
         <Link
           href="/"
@@ -26,7 +26,7 @@ export default function SubLayout({
           </svg>
           Back to Dashboard
         </Link>
-        <div className="mt-4">{children}</div>
+        <div className="mt-1">{children}</div>
       </div>
     </div>
   );

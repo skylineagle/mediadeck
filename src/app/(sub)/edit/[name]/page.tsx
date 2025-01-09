@@ -46,8 +46,10 @@ export default function EditPathPage() {
       <Loader2 className="h-10 w-10 animate-spin" />
     </div>
   ) : (
-    <div className="mx-auto max-w-4xl space-y-8 p-4">
-      <h1 className="text-2xl font-bold">Edit Path: {name}</h1>
+    <div className="mx-auto max-w-4xl space-y-4">
+      <h1 className="text-2xl font-bold">
+        Edit {name.charAt(0).toUpperCase() + name.slice(1)} Path
+      </h1>
       <CreatePathForm
         initialData={pathWithDefaults}
         submitButtonText="Update Path"

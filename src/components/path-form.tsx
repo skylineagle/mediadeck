@@ -119,118 +119,127 @@ export function CreatePathForm({
           <TabsContent value="basic">
             <Card>
               <CardContent className="space-y-4 pt-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Path Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter path name" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The unique name for this path
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="source"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Source URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="rtsp://..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Source URL for the stream
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="sourceOnDemand"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Source On Demand</FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Path Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter path name" {...field} />
+                        </FormControl>
                         <FormDescription>
-                          Connect to source only when requested
+                          The unique name for this path
                         </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="sourceOnDemandStartTimeout"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Source On Demand Start Timeout</FormLabel>
-                      <FormControl>
-                        <Input placeholder="10s" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Timeout for source connection
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="source"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Source URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="rtsp://..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Source URL for the stream
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="maxReaders"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Max Readers</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          onChange={(e) =>
-                            onChange(parseInt(e.target.value) || 0)
-                          }
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Maximum number of readers (0 for unlimited)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="sourceOnDemandStartTimeout"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Source On Demand Start Timeout</FormLabel>
+                        <FormControl>
+                          <Input placeholder="10s" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Timeout for source connection
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="fallback"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fallback Path</FormLabel>
-                      <FormControl>
-                        <Input placeholder="fallback-path" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Path to use when this path is not ready
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="maxReaders"
+                    render={({ field: { onChange, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>Max Readers</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            onChange={(e) =>
+                              onChange(parseInt(e.target.value) || 0)
+                            }
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Maximum number of readers (0 for unlimited)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fallback"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Fallback Path</FormLabel>
+                        <FormControl>
+                          <Input placeholder="fallback-path" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Path to use when this path is not ready
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="sourceOnDemand"
+                    render={({ field }) => (
+                      <FormItem className="flex h-full flex-col justify-end pb-6">
+                        <div className="flex items-center space-x-3">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Source On Demand</FormLabel>
+                            <FormDescription>
+                              Connect to source only when requested
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -242,7 +251,7 @@ export function CreatePathForm({
                   control={form.control}
                   name="record"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 pb-4">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -259,76 +268,101 @@ export function CreatePathForm({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="recordPath"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Record Path</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="/recordings"
-                          {...field}
-                          disabled={!form.watch("record")}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Path where recordings will be saved
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="recordFormat"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Record Format</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={!form.watch("record")}
-                      >
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="recordPath"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Record Path</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select format" />
-                          </SelectTrigger>
+                          <Input
+                            placeholder="/recordings"
+                            {...field}
+                            disabled={!form.watch("record")}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="mp4">MP4</SelectItem>
-                          <SelectItem value="fmp4">Fragmented MP4</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Format of the recorded files
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormDescription>
+                          Path where recordings will be saved
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="recordDeleteAfter"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Delete After</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="24h"
-                          {...field}
+                  <FormField
+                    control={form.control}
+                    name="recordFormat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Record Format</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
                           disabled={!form.watch("record")}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Delete recordings after this duration
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select format" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="mp4">MP4</SelectItem>
+                            <SelectItem value="fmp4">Fragmented MP4</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Format of the recorded files
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="recordDeleteAfter"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Delete After</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="24h"
+                            {...field}
+                            disabled={!form.watch("record")}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Delete recordings after this duration
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="recordSegmentDuration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Segment Duration</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="1h"
+                            {...field}
+                            disabled={!form.watch("record")}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Duration of each recording segment
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -336,6 +370,42 @@ export function CreatePathForm({
           <TabsContent value="publisher">
             <Card>
               <CardContent className="space-y-4 pt-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="srtPublishPassphrase"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SRT Publish Passphrase</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Passphrase for SRT publishing
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="srtReadPassphrase"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SRT Read Passphrase</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Passphrase for SRT reading
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <FormField
                   control={form.control}
                   name="overridePublisher"
@@ -356,40 +426,6 @@ export function CreatePathForm({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="srtPublishPassphrase"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SRT Publish Passphrase</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Passphrase for SRT publishing
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="srtReadPassphrase"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SRT Read Passphrase</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Passphrase for SRT reading
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -397,55 +433,62 @@ export function CreatePathForm({
           <TabsContent value="rtsp">
             <Card>
               <CardContent className="space-y-4 pt-6">
-                <FormField
-                  control={form.control}
-                  name="rtspTransport"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>RTSP Transport</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select transport" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="udp">UDP</SelectItem>
-                          <SelectItem value="tcp">TCP</SelectItem>
-                          <SelectItem value="udp_multicast">
-                            UDP Multicast
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>RTSP transport protocol</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="rtspAnyPort"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>RTSP Any Port</FormLabel>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="rtspTransport"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>RTSP Transport</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select transport" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="udp">UDP</SelectItem>
+                            <SelectItem value="tcp">TCP</SelectItem>
+                            <SelectItem value="udp_multicast">
+                              UDP Multicast
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
-                          Use any available port for RTSP
+                          RTSP transport protocol
                         </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="rtspAnyPort"
+                    render={({ field }) => (
+                      <FormItem className="flex h-full flex-col justify-end pb-6">
+                        <div className="flex items-center space-x-3">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>RTSP Any Port</FormLabel>
+                            <FormDescription>
+                              Use any available port for RTSP
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -453,7 +496,7 @@ export function CreatePathForm({
           <TabsContent value="rpi">
             <Card>
               <CardContent className="space-y-4 pt-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="rpiCameraWidth"
@@ -485,6 +528,27 @@ export function CreatePathForm({
                           <Input
                             type="number"
                             placeholder="1080"
+                            onChange={(e) =>
+                              onChange(parseInt(e.target.value) || 0)
+                            }
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="rpiCameraFPS"
+                    render={({ field: { onChange, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>FPS</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="30"
                             onChange={(e) =>
                               onChange(parseInt(e.target.value) || 0)
                             }
@@ -534,27 +598,6 @@ export function CreatePathForm({
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="rpiCameraFPS"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>FPS</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="30"
-                          onChange={(e) =>
-                            onChange(parseInt(e.target.value) || 0)
-                          }
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -562,73 +605,77 @@ export function CreatePathForm({
           <TabsContent value="hooks">
             <Card>
               <CardContent className="space-y-4 pt-6">
-                <FormField
-                  control={form.control}
-                  name="runOnInit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Run on Init</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ffmpeg -i ..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Command to run when path is initialized
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="runOnInit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Run on Init</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ffmpeg -i ..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Command to run when path is initialized
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="runOnDemand"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Run on Demand</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ffmpeg -i ..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Command to run when path is demanded
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="runOnDemand"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Run on Demand</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ffmpeg -i ..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Command to run when path is demanded
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="runOnReady"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Run on Ready</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ffmpeg -i ..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Command to run when path becomes ready
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="runOnReady"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Run on Ready</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ffmpeg -i ..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Command to run when path becomes ready
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="runOnRead"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Run on Read</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ffmpeg -i ..." {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Command to run when path is read
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="runOnRead"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Run on Read</FormLabel>
+                        <FormControl>
+                          <Input placeholder="ffmpeg -i ..." {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Command to run when path is read
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

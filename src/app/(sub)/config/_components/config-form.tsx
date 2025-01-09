@@ -11,10 +11,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import type { ConfigFormData } from "@/lib/schemas/config.schema";
 import { api } from "@/trpc/react";
@@ -187,680 +188,796 @@ export function ConfigForm() {
         </AlertDialog>
       )}
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">API Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable API</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable controlling the server through the Control API
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.api ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("api", checked)
-                  }
-                />
-              </div>
+      <Tabs defaultValue="api" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="api">API</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="rtsp">RTSP</TabsTrigger>
+          <TabsTrigger value="rtmp">RTMP</TabsTrigger>
+          <TabsTrigger value="hls">HLS</TabsTrigger>
+          <TabsTrigger value="webrtc">WebRTC</TabsTrigger>
+          <TabsTrigger value="srt">SRT</TabsTrigger>
+        </TabsList>
+        <Card>
+          <CardContent className="pt-6">
+            <TabsContent value="api" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  API Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>API Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.apiAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("apiAddress", e.target.value)
+                        }
+                        placeholder=":9997"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the Control API listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>API Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.apiAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("apiAddress", e.target.value)
-                  }
-                  placeholder=":9997"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the Control API listener
-                </p>
-              </div>
-
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">API Encryption</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable TLS/HTTPS on the Control API server
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.apiEncryption ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("apiEncryption", checked)
-                  }
-                />
-              </div>
-
-              {configs?.mtxConfig.apiEncryption && (
-                <>
-                  <div className="space-y-2">
-                    <Label>API Server Key</Label>
-                    <Input
-                      value={configs?.mtxConfig?.apiServerKey ?? ""}
-                      onChange={(e) =>
-                        handleConfigChange("apiServerKey", e.target.value)
-                      }
-                      placeholder="server.key"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Path to the server key (required when encryption is
-                      enabled)
-                    </p>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable API</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable controlling the server through the Control
+                            API
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.api ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("api", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>API Server Certificate</Label>
-                    <Input
-                      value={configs?.mtxConfig?.apiServerCert ?? ""}
-                      onChange={(e) =>
-                        handleConfigChange("apiServerCert", e.target.value)
-                      }
-                      placeholder="server.crt"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Path to the server certificate
-                    </p>
-                  </div>
-                </>
-              )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>API Encryption</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable TLS/HTTPS on the Control API server
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.apiEncryption ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("apiEncryption", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
 
-              <div className="space-y-2">
-                <Label>API Allow Origin</Label>
-                <Input
-                  value={configs?.mtxConfig?.apiAllowOrigin ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("apiAllowOrigin", e.target.value)
-                  }
-                  placeholder="*"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Value of the Access-Control-Allow-Origin header
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Metrics Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable Metrics</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the metrics server
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.metrics ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("metrics", checked)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Metrics Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.metricsAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("metricsAddress", e.target.value)
-                  }
-                  placeholder=":9998"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the metrics server
-                </p>
-              </div>
-
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Metrics Encryption</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable TLS/HTTPS on the metrics server
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.metricsEncryption ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("metricsEncryption", checked)
-                  }
-                />
-              </div>
-
-              {configs?.mtxConfig.metricsEncryption && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Metrics Server Key</Label>
-                    <Input
-                      value={configs?.mtxConfig?.metricsServerKey ?? ""}
-                      onChange={(e) =>
-                        handleConfigChange("metricsServerKey", e.target.value)
-                      }
-                      placeholder="server.key"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Path to the server key (required when encryption is
-                      enabled)
-                    </p>
+                    <div className="space-y-2">
+                      <Label>API Allow Origin</Label>
+                      <Input
+                        value={configs?.mtxConfig?.apiAllowOrigin ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("apiAllowOrigin", e.target.value)
+                        }
+                        placeholder="*"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Value of the Access-Control-Allow-Origin header
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Metrics Server Certificate</Label>
-                    <Input
-                      value={configs?.mtxConfig?.metricsServerCert ?? ""}
-                      onChange={(e) =>
-                        handleConfigChange("metricsServerCert", e.target.value)
-                      }
-                      placeholder="server.crt"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Path to the server certificate
-                    </p>
+                  {configs?.mtxConfig.apiEncryption && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>API Server Key</Label>
+                        <Input
+                          value={configs?.mtxConfig?.apiServerKey ?? ""}
+                          onChange={(e) =>
+                            handleConfigChange("apiServerKey", e.target.value)
+                          }
+                          placeholder="server.key"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Path to the server key (required when encryption is
+                          enabled)
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>API Server Certificate</Label>
+                        <Input
+                          value={configs?.mtxConfig?.apiServerCert ?? ""}
+                          onChange={(e) =>
+                            handleConfigChange("apiServerCert", e.target.value)
+                          }
+                          placeholder="server.crt"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Path to the server certificate
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="metrics" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  Metrics Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Metrics Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.metricsAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("metricsAddress", e.target.value)
+                        }
+                        placeholder=":9998"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the metrics server
+                      </p>
+                    </div>
+
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable Metrics</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the metrics server
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.metrics ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("metrics", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
                   </div>
-                </>
-              )}
 
-              <div className="space-y-2">
-                <Label>Metrics Allow Origin</Label>
-                <Input
-                  value={configs?.mtxConfig?.metricsAllowOrigin ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("metricsAllowOrigin", e.target.value)
-                  }
-                  placeholder="*"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Value of the Access-Control-Allow-Origin header
-                </p>
-              </div>
-            </div>
-          </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Metrics Encryption</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable TLS/HTTPS on the metrics server
+                          </p>
+                        </div>
+                        <Switch
+                          checked={
+                            configs?.mtxConfig?.metricsEncryption ?? false
+                          }
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("metricsEncryption", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
 
-          <Separator className="my-6" />
+                    <div className="space-y-2">
+                      <Label>Metrics Allow Origin</Label>
+                      <Input
+                        value={configs?.mtxConfig?.metricsAllowOrigin ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "metricsAllowOrigin",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="*"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Value of the Access-Control-Allow-Origin header
+                      </p>
+                    </div>
+                  </div>
 
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">RTSP Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable RTSP</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the RTSP protocol
-                  </p>
+                  {configs?.mtxConfig.metricsEncryption && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Metrics Server Key</Label>
+                        <Input
+                          value={configs?.mtxConfig?.metricsServerKey ?? ""}
+                          onChange={(e) =>
+                            handleConfigChange(
+                              "metricsServerKey",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="server.key"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Path to the server key (required when encryption is
+                          enabled)
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Metrics Server Certificate</Label>
+                        <Input
+                          value={configs?.mtxConfig?.metricsServerCert ?? ""}
+                          onChange={(e) =>
+                            handleConfigChange(
+                              "metricsServerCert",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="server.crt"
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Path to the server certificate
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.rtsp ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("rtsp", checked)
-                  }
-                />
               </div>
+            </TabsContent>
 
-              <div className="space-y-2">
-                <Label>RTSP Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtspAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtspAddress", e.target.value)
-                  }
-                  placeholder=":8554"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTSP listener
-                </p>
-              </div>
+            <TabsContent value="rtsp" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  RTSP Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>RTSP Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtspAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtspAddress", e.target.value)
+                        }
+                        placeholder=":8554"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTSP listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>RTSPS Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtspsAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtspsAddress", e.target.value)
-                  }
-                  placeholder=":8322"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTSPS listener
-                </p>
-              </div>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable RTSP</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the RTSP protocol
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.rtsp ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("rtsp", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>RTP Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtpAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtpAddress", e.target.value)
-                  }
-                  placeholder=":8000"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTP listener
-                </p>
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>RTSPS Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtspsAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtspsAddress", e.target.value)
+                        }
+                        placeholder=":8322"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTSPS listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>RTCP Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtcpAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtcpAddress", e.target.value)
-                  }
-                  placeholder=":8001"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTCP listener
-                </p>
-              </div>
+                    <div className="space-y-2">
+                      <Label>RTP Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtpAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtpAddress", e.target.value)
+                        }
+                        placeholder=":8000"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTP listener
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Multicast IP Range</Label>
-                <Input
-                  value={configs?.mtxConfig?.multicastIPRange ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("multicastIPRange", e.target.value)
-                  }
-                  placeholder="224.1.0.0/16"
-                />
-                <p className="text-sm text-muted-foreground">
-                  IP range used for multicast
-                </p>
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>RTCP Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtcpAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtcpAddress", e.target.value)
+                        }
+                        placeholder=":8001"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTCP listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>Multicast RTP Port</Label>
-                <Input
-                  type="number"
-                  value={configs?.mtxConfig?.multicastRTPPort ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange(
-                      "multicastRTPPort",
-                      parseInt(e.target.value),
-                    )
-                  }
-                  placeholder="8002"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Port used for multicast RTP
-                </p>
-              </div>
+                    <div className="space-y-2">
+                      <Label>Multicast IP Range</Label>
+                      <Input
+                        value={configs?.mtxConfig?.multicastIPRange ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("multicastIPRange", e.target.value)
+                        }
+                        placeholder="224.1.0.0/16"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        IP range used for multicast
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Multicast RTCP Port</Label>
-                <Input
-                  type="number"
-                  value={configs?.mtxConfig?.multicastRTCPPort ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange(
-                      "multicastRTCPPort",
-                      parseInt(e.target.value),
-                    )
-                  }
-                  placeholder="8003"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Port used for multicast RTCP
-                </p>
-              </div>
-            </div>
-          </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Multicast RTP Port</Label>
+                      <Input
+                        type="number"
+                        value={configs?.mtxConfig?.multicastRTPPort ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "multicastRTPPort",
+                            parseInt(e.target.value),
+                          )
+                        }
+                        placeholder="8002"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Port used for multicast RTP
+                      </p>
+                    </div>
 
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">RTMP Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable RTMP</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the RTMP protocol
-                  </p>
+                    <div className="space-y-2">
+                      <Label>Multicast RTCP Port</Label>
+                      <Input
+                        type="number"
+                        value={configs?.mtxConfig?.multicastRTCPPort ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "multicastRTCPPort",
+                            parseInt(e.target.value),
+                          )
+                        }
+                        placeholder="8003"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Port used for multicast RTCP
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.rtmp ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("rtmp", checked)
-                  }
-                />
               </div>
+            </TabsContent>
 
-              <div className="space-y-2">
-                <Label>RTMP Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtmpAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtmpAddress", e.target.value)
-                  }
-                  placeholder=":1935"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTMP listener
-                </p>
-              </div>
+            <TabsContent value="rtmp" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  RTMP Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>RTMP Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtmpAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtmpAddress", e.target.value)
+                        }
+                        placeholder=":1935"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTMP listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>RTMP Encryption</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtmpEncryption ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtmpEncryption", e.target.value)
-                  }
-                  placeholder="no"
-                />
-                <p className="text-sm text-muted-foreground">
-                  RTMP encryption type (no, optional, strict)
-                </p>
-              </div>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable RTMP</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the RTMP protocol
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.rtmp ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("rtmp", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>RTMPS Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.rtmpsAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("rtmpsAddress", e.target.value)
-                  }
-                  placeholder=":1936"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the RTMPS listener
-                </p>
-              </div>
-            </div>
-          </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>RTMP Encryption</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtmpEncryption ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtmpEncryption", e.target.value)
+                        }
+                        placeholder="no"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        RTMP encryption type (no, optional, strict)
+                      </p>
+                    </div>
 
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">HLS Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable HLS</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the HLS protocol
-                  </p>
+                    <div className="space-y-2">
+                      <Label>RTMPS Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.rtmpsAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("rtmpsAddress", e.target.value)
+                        }
+                        placeholder=":1936"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the RTMPS listener
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.hls ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("hls", checked)
-                  }
-                />
               </div>
+            </TabsContent>
 
-              <div className="space-y-2">
-                <Label>HLS Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsAddress", e.target.value)
-                  }
-                  placeholder=":8888"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the HLS listener
-                </p>
-              </div>
+            <TabsContent value="hls" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  HLS Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>HLS Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("hlsAddress", e.target.value)
+                        }
+                        placeholder=":8888"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the HLS listener
+                      </p>
+                    </div>
 
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">HLS Encryption</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable TLS/HTTPS on the HLS server
-                  </p>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable HLS</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the HLS protocol
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.hls ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("hls", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>HLS Encryption</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable TLS/HTTPS on the HLS server
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.hlsEncryption ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("hlsEncryption", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>HLS Always Remux</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Always remux incoming streams
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.hlsAlwaysRemux ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("hlsAlwaysRemux", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>HLS Allow Origin</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsAllowOrigin ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("hlsAllowOrigin", e.target.value)
+                        }
+                        placeholder="*"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Value of the Access-Control-Allow-Origin header
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>HLS Variant</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsVariant ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("hlsVariant", e.target.value)
+                        }
+                        placeholder="lowLatency"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        HLS variant (lowLatency, standard)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>HLS Segment Count</Label>
+                      <Input
+                        type="number"
+                        value={configs?.mtxConfig?.hlsSegmentCount ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "hlsSegmentCount",
+                            parseInt(e.target.value),
+                          )
+                        }
+                        placeholder="7"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Number of segments to keep in the playlist
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>HLS Segment Duration</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsSegmentDuration ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "hlsSegmentDuration",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="1s"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Duration of each segment
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>HLS Part Duration</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsPartDuration ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("hlsPartDuration", e.target.value)
+                        }
+                        placeholder="200ms"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Duration of each partial segment
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>HLS Segment Max Size</Label>
+                      <Input
+                        value={configs?.mtxConfig?.hlsSegmentMaxSize ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "hlsSegmentMaxSize",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="50M"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Maximum size of each segment
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.hlsEncryption ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("hlsEncryption", checked)
-                  }
-                />
               </div>
+            </TabsContent>
 
-              <div className="space-y-2">
-                <Label>HLS Allow Origin</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsAllowOrigin ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsAllowOrigin", e.target.value)
-                  }
-                  placeholder="*"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Value of the Access-Control-Allow-Origin header
-                </p>
-              </div>
+            <TabsContent value="webrtc" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  WebRTC Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>WebRTC Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.webrtcAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("webrtcAddress", e.target.value)
+                        }
+                        placeholder=":8889"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the WebRTC listener
+                      </p>
+                    </div>
 
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">HLS Always Remux</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Always remux incoming streams
-                  </p>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable WebRTC</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the WebRTC protocol
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.webrtc ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("webrtc", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>WebRTC Encryption</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable TLS/HTTPS on the WebRTC server
+                          </p>
+                        </div>
+                        <Switch
+                          checked={
+                            configs?.mtxConfig?.webrtcEncryption ?? false
+                          }
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("webrtcEncryption", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+
+                    <div className="space-y-2">
+                      <Label>WebRTC Allow Origin</Label>
+                      <Input
+                        value={configs?.mtxConfig?.webrtcAllowOrigin ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "webrtcAllowOrigin",
+                            e.target.value,
+                          )
+                        }
+                        placeholder="*"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Value of the Access-Control-Allow-Origin header
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>WebRTC ICE UDP Mux Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.webrtcICEUDPMuxAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "webrtcICEUDPMuxAddress",
+                            e.target.value,
+                          )
+                        }
+                        placeholder=":8890"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the WebRTC ICE UDP mux
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>WebRTC ICE TCP Mux Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.webrtcICETCPMuxAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange(
+                            "webrtcICETCPMuxAddress",
+                            e.target.value,
+                          )
+                        }
+                        placeholder=":8891"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the WebRTC ICE TCP mux
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.hlsAlwaysRemux ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("hlsAlwaysRemux", checked)
-                  }
-                />
               </div>
+            </TabsContent>
 
-              <div className="space-y-2">
-                <Label>HLS Variant</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsVariant ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsVariant", e.target.value)
-                  }
-                  placeholder="lowLatency"
-                />
-                <p className="text-sm text-muted-foreground">
-                  HLS variant (lowLatency, standard)
-                </p>
-              </div>
+            <TabsContent value="srt" className="space-y-6">
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  SRT Configuration
+                </h2>
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>SRT Address</Label>
+                      <Input
+                        value={configs?.mtxConfig?.srtAddress ?? ""}
+                        onChange={(e) =>
+                          handleConfigChange("srtAddress", e.target.value)
+                        }
+                        placeholder=":8890"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Address of the SRT listener
+                      </p>
+                    </div>
 
-              <div className="space-y-2">
-                <Label>HLS Segment Count</Label>
-                <Input
-                  type="number"
-                  value={configs?.mtxConfig?.hlsSegmentCount ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange(
-                      "hlsSegmentCount",
-                      parseInt(e.target.value),
-                    )
-                  }
-                  placeholder="7"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Number of segments to keep in the playlist
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>HLS Segment Duration</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsSegmentDuration ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsSegmentDuration", e.target.value)
-                  }
-                  placeholder="1s"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Duration of each segment
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>HLS Part Duration</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsPartDuration ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsPartDuration", e.target.value)
-                  }
-                  placeholder="200ms"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Duration of each partial segment
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>HLS Segment Max Size</Label>
-                <Input
-                  value={configs?.mtxConfig?.hlsSegmentMaxSize ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("hlsSegmentMaxSize", e.target.value)
-                  }
-                  placeholder="50M"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Maximum size of each segment
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">WebRTC Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable WebRTC</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the WebRTC protocol
-                  </p>
+                    <FormItem className="flex h-full flex-col justify-end pb-6">
+                      <div className="flex items-center justify-between space-x-3">
+                        <div className="space-y-0.5">
+                          <Label>Enable SRT</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Enable the SRT protocol
+                          </p>
+                        </div>
+                        <Switch
+                          checked={configs?.mtxConfig?.srt ?? false}
+                          onCheckedChange={(checked) =>
+                            handleConfigChange("srt", checked)
+                          }
+                        />
+                      </div>
+                    </FormItem>
+                  </div>
                 </div>
-                <Switch
-                  checked={configs?.mtxConfig?.webrtc ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("webrtc", checked)
-                  }
-                />
               </div>
-
-              <div className="space-y-2">
-                <Label>WebRTC Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.webrtcAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("webrtcAddress", e.target.value)
-                  }
-                  placeholder=":8889"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the WebRTC listener
-                </p>
-              </div>
-
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">WebRTC Encryption</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable TLS/HTTPS on the WebRTC server
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.webrtcEncryption ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("webrtcEncryption", checked)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>WebRTC Allow Origin</Label>
-                <Input
-                  value={configs?.mtxConfig?.webrtcAllowOrigin ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("webrtcAllowOrigin", e.target.value)
-                  }
-                  placeholder="*"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Value of the Access-Control-Allow-Origin header
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>WebRTC ICE UDP Mux Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.webrtcICEUDPMuxAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("webrtcICEUDPMuxAddress", e.target.value)
-                  }
-                  placeholder=":8890"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the WebRTC ICE UDP mux
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label>WebRTC ICE TCP Mux Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.webrtcICETCPMuxAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("webrtcICETCPMuxAddress", e.target.value)
-                  }
-                  placeholder=":8891"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the WebRTC ICE TCP mux
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">SRT Configuration</h2>
-            <div className="grid gap-4">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Enable SRT</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable the SRT protocol
-                  </p>
-                </div>
-                <Switch
-                  checked={configs?.mtxConfig?.srt ?? false}
-                  onCheckedChange={(checked) =>
-                    handleConfigChange("srt", checked)
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>SRT Address</Label>
-                <Input
-                  value={configs?.mtxConfig?.srtAddress ?? ""}
-                  onChange={(e) =>
-                    handleConfigChange("srtAddress", e.target.value)
-                  }
-                  placeholder=":8890"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Address of the SRT listener
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-        </CardContent>
-      </Card>
+            </TabsContent>
+          </CardContent>
+        </Card>
+      </Tabs>
     </>
   );
 }

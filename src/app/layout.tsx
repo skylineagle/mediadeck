@@ -1,15 +1,21 @@
 import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
+import { MediaMtxStatus } from "@/components/mediamtx-status";
 import { MetricsPoller } from "@/components/metrics-poller";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
 import { GeistSans } from "geist/font/sans";
-import { Settings } from "lucide-react";
+import { Menu } from "lucide-react";
 import { type Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { MediaMtxStatus } from "@/components/mediamtx-status";
 
 import "@/styles/globals.css";
 
@@ -42,9 +48,19 @@ export default function RootLayout({
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <Link href="/settings">
-                        <Settings />
-                      </Link>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <Menu className="h-6 w-6" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href="/settings">Settings</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/config">Config</Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       <AnimatedThemeToggle />
                     </div>
                   </div>

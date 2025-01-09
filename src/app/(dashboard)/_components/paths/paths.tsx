@@ -260,17 +260,8 @@ export function Paths() {
   });
 
   return (
-    <div className="mx-4">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="space-y-1.5" />
-        <Link href="/create">
-          <Button>Add Path</Button>
-        </Link>
-      </div>
-
-      <DataTable table={table}>
-        <DataTableToolbar table={table} filterFields={filterFields} />
-      </DataTable>
-    </div>
+    <DataTable table={table}>
+      <DataTableToolbar table={table} filterFields={filterFields} />
+    </DataTable>
   );
 }

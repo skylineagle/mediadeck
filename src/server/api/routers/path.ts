@@ -1,4 +1,5 @@
 import type { Path } from "@/lib/types";
+import { withMtxUrl } from "@/lib/validators";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
@@ -17,10 +18,6 @@ const pathSchema = z.object({
   record: z.boolean().optional(),
   recordPath: z.string().optional(),
   recordFormat: z.string().optional(),
-});
-
-const withMtxUrl = z.object({
-  mtxUrl: z.string().url(),
 });
 
 export const pathRouter = createTRPCRouter({
@@ -58,10 +55,11 @@ export const pathRouter = createTRPCRouter({
             json: pathData,
           })
           .json();
-
         // Add to database
         await ctx.db.insert(paths).values({
           ...pathData,
+          sourceOnDemand: pathData.sourceOnDemand ? "1" : "0",
+          record: pathData.record ? "1" : "0",
         });
 
         revalidatePath("/");
@@ -131,7 +129,6 @@ export const pathRouter = createTRPCRouter({
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { createdAt, updatedAt, id, ...info } = pathData;
-        console.log(info);
 
         // Add to MediaMTX
         const response = await ky.post(
@@ -198,9 +195,12 @@ export const pathRouter = createTRPCRouter({
 
   healthcheck: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
     try {
+      console.log(input.mtxUrl);
       await ky.get(`${input.mtxUrl}/v3/paths/list`).json();
+      console.log("Connected");
       return { isConnected: true };
-    } catch {
+    } catch (error) {
+      console.log(error);
       return { isConnected: false };
     }
   }),

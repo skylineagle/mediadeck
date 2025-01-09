@@ -161,8 +161,6 @@ export function Paths() {
           );
         },
         filterFn: (row, id, value) => {
-          console.log(value);
-
           return value.includes(row.original.record.toString());
         },
       },

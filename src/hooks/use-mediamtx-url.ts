@@ -1,11 +1,11 @@
-import { env } from "@/env";
-import { parseAsString, useQueryState } from "nuqs";
+import { useSettings } from "./use-settings";
 
 export function useMediaMtxUrl() {
-  const [mtxUrl, setMtxUrl] = useQueryState(
-    "mtx-url",
-    parseAsString.withDefault(env.NEXT_PUBLIC_MEDIAMTX_API_URL),
-  );
+  const { settings, setSettings } = useSettings();
 
-  return { mtxUrl, setMtxUrl };
+  return {
+    mtxUrl: settings.mediaMtxUrl,
+    setMtxUrl: (value: string) =>
+      setSettings({ ...settings, mediaMtxUrl: value }),
+  };
 }

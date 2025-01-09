@@ -1,60 +1,47 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
-import {
-  index,
-  integer,
-  pgTableCreator,
-  timestamp,
-  varchar,
-  boolean,
-} from "drizzle-orm/pg-core";
+import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
-export const createTable = pgTableCreator((name) => `mediamtx-panel_${name}`);
+export const paths = pgTable("paths", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  source: text("source"),
+  sourceProtocol: text("source_protocol"),
+  sourceOnDemand: text("source_on_demand"),
+  sourceOnDemandStartTimeout: text("source_on_demand_start_timeout"),
+  sourceOnDemandCloseAfter: text("source_on_demand_close_after"),
+  sourceRedirect: text("source_redirect"),
+  fallback: text("fallback"),
+  record: text("record"),
+  recordPath: text("record_path"),
+  recordFormat: text("record_format"),
+  recordPartDuration: text("record_part_duration"),
+  recordSegmentDuration: text("record_segment_duration"),
+  recordDeleteAfter: text("record_delete_after"),
+  publishUser: text("publish_user"),
+  publishPass: text("publish_pass"),
+  publishIPs: text("publish_ips"),
+  readUser: text("read_user"),
+  readPass: text("read_pass"),
+  readIPs: text("read_ips"),
+  runOnInit: text("run_on_init"),
+  runOnInitRestart: text("run_on_init_restart"),
+  runOnDemand: text("run_on_demand"),
+  runOnDemandRestart: text("run_on_demand_restart"),
+  runOnDemandStartTimeout: text("run_on_demand_start_timeout"),
+  runOnDemandCloseAfter: text("run_on_demand_close_after"),
+  runOnReady: text("run_on_ready"),
+  runOnReadyRestart: text("run_on_ready_restart"),
+  runOnRead: text("run_on_read"),
+  runOnReadRestart: text("run_on_read_restart"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
-export const posts = createTable(
-  "post",
-  {
-    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-    name: varchar("name", { length: 256 }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
-
-export const paths = createTable("path", {
-  id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
-  name: varchar("name", { length: 256 }).notNull().unique(),
-  source: varchar("source", { length: 1024 }),
-  sourceOnDemand: boolean("source_on_demand").default(false),
-  sourceOnDemandStartTimeout: varchar("source_on_demand_start_timeout", {
-    length: 256,
-  }),
-  sourceOnDemandCloseAfter: varchar("source_on_demand_close_after", {
-    length: 256,
-  }),
-  fallback: varchar("fallback", { length: 1024 }),
-  record: boolean("record").default(false),
-  recordPath: varchar("record_path", { length: 1024 }),
-  recordFormat: varchar("record_format", { length: 256 }),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-    () => new Date(),
-  ),
+export const config = pgTable("config", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  config: jsonb("config").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -4,6 +4,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Database,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,16 @@ export function DataTablePagination<TData>({
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8">
-      <div className="flex-1 whitespace-nowrap text-sm text-muted-foreground"></div>
+      <div className="flex-1 whitespace-nowrap text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Database className="h-4 w-4 text-blue-400" /> Synced to DB
+          </div>
+          <div className="flex items-center gap-1">
+            <Database className="h-4 w-4 text-muted-foreground" /> Not synced
+          </div>
+        </div>
+      </div>
       <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
         <div className="flex items-center space-x-2">
           <p className="whitespace-nowrap text-sm font-medium">Rows per page</p>

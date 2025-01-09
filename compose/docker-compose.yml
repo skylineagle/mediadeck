@@ -7,6 +7,7 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080" # Dashboard
+      - "5432:5432" # PostgreSQL TCP entrypoint
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik:/etc/traefik
@@ -18,8 +19,6 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
       - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
@@ -44,17 +43,25 @@ services:
           - mediamtx.localhost
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.mediamtx-api.rule=Host(`api.mediamtx.local`)"
+      # API endpoint
+      - "traefik.http.routers.mediamtx-api.rule=Host(`api.${DOMAIN_NAME}`)"
       - "traefik.http.routers.mediamtx-api.service=mediamtx-api"
+      - "traefik.http.routers.mediamtx-api.entrypoints=web"
       - "traefik.http.services.mediamtx-api.loadbalancer.server.port=9997"
-      - "traefik.http.routers.mediamtx-metrics.rule=Host(`metrics.mediamtx.local`)"
+      # Metrics endpoint
+      - "traefik.http.routers.mediamtx-metrics.rule=Host(`metrics.${DOMAIN_NAME}`)"
       - "traefik.http.routers.mediamtx-metrics.service=mediamtx-metrics"
+      - "traefik.http.routers.mediamtx-metrics.entrypoints=web"
       - "traefik.http.services.mediamtx-metrics.loadbalancer.server.port=9998"
-      - "traefik.http.routers.mediamtx-hls.rule=Host(`hls.mediamtx.local`)"
+      # HLS endpoint
+      - "traefik.http.routers.mediamtx-hls.rule=Host(`hls.${DOMAIN_NAME}`)"
       - "traefik.http.routers.mediamtx-hls.service=mediamtx-hls"
+      - "traefik.http.routers.mediamtx-hls.entrypoints=web"
       - "traefik.http.services.mediamtx-hls.loadbalancer.server.port=8888"
-      - "traefik.http.routers.mediamtx-webrtc.rule=Host(`webrtc.mediamtx.local`)"
+      # WebRTC endpoint
+      - "traefik.http.routers.mediamtx-webrtc.rule=Host(`webrtc.${DOMAIN_NAME}`)"
       - "traefik.http.routers.mediamtx-webrtc.service=mediamtx-webrtc"
+      - "traefik.http.routers.mediamtx-webrtc.entrypoints=web"
       - "traefik.http.services.mediamtx-webrtc.loadbalancer.server.port=8889"
 
   n8n:
@@ -98,8 +105,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=bgCHKMhIKNov8PaG
       - POSTGRES_DB=mediamtx-panel
-    ports:
-      - "5432:5432"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.entrypoints=tcp"
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
     networks:
       - monitoring
     volumes:

@@ -152,7 +152,6 @@ export function Paths() {
         },
         cell: ({ row }) => {
           const path = row.original;
-          console.log(path);
 
           return (
             <Badge variant={path.record ? "default" : "secondary"}>

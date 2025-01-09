@@ -1,4 +1,4 @@
-import { pathSchema } from "@/lib/schemas/config.schema";
+import { pathSchema } from "@/lib/schemas/path.schema";
 import type { Path, PathConfig } from "@/lib/types";
 import { withMtxUrl } from "@/lib/validators";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
@@ -41,9 +41,6 @@ export const pathRouter = createTRPCRouter({
           })),
       ];
 
-      console.log(pathConfigs.find((path) => path.name === "recorded"));
-      console.log(enhancedPaths.find((path) => path.name === "recorded"));
-
       return enhancedPaths;
     }),
 
@@ -53,11 +50,22 @@ export const pathRouter = createTRPCRouter({
       const { data, mediamtx } = input;
       try {
         // Add to Media MTX
-        await ky
-          .post(`${mediamtx.mtxUrl}/v3/config/paths/add/${data.name}`, {
-            json: data,
-          })
-          .json();
+        const response = await fetch(
+          `${mediamtx.mtxUrl}/v3/config/paths/add/${data.name}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          },
+        );
+
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body.error);
+        }
+
         // Add to database with boolean to string conversion
 
         // Get the created path from MediaMTX to ensure we have the latest data
@@ -78,7 +86,6 @@ export const pathRouter = createTRPCRouter({
         revalidatePath("/");
         return { success: true };
       } catch (error) {
-        console.error("Error creating path:", error);
         throw error;
       }
     }),
@@ -209,9 +216,56 @@ export const pathRouter = createTRPCRouter({
     try {
       await ky.get(`${input.mtxUrl}/v3/paths/list`).json();
       return { isConnected: true };
-    } catch (error) {
-      console.log(error);
+    } catch {
       return { isConnected: false };
     }
   }),
+
+  getPathConfig: publicProcedure
+    .input(z.object({ name: z.string() }).merge(withMtxUrl))
+    .query(async ({ input }) => {
+      const { mtxUrl, name } = input;
+      const response = await ky
+        .get<PathConfig>(`${mtxUrl}/v3/config/paths/get/${name}`)
+        .json();
+      return response;
+    }),
+
+  update: publicProcedure
+    .input(z.object({ data: pathSchema, mediamtx: withMtxUrl }))
+    .mutation(async ({ ctx, input }) => {
+      const { data, mediamtx } = input;
+      try {
+        // Update in Media MTX
+        const response = await fetch(
+          `${mediamtx.mtxUrl}/v3/config/paths/patch/${data.name}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          },
+        );
+
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body.error);
+        }
+
+        // Update in database
+        await ctx.db
+          .update(paths)
+          .set({
+            ...data,
+            updatedAt: new Date(),
+          })
+          .where(eq(paths.name, data.name));
+
+        revalidatePath("/");
+        return { success: true };
+      } catch (error) {
+        throw error;
+      }
+    }),
 });

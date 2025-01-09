@@ -53,7 +53,7 @@ export default function RootLayout({
                 </div>
               </TRPCReactProvider>
             </NuqsAdapter>
-            <Toaster />
+            <Toaster closeButton />
           </TooltipProvider>
         </ThemeProvider>
       </body>

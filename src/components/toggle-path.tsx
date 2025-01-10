@@ -6,7 +6,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Loader2, Power } from "lucide-react";
@@ -19,7 +18,6 @@ interface TogglePathProps {
 }
 
 export function TogglePath({ name, isActive, onToggle }: TogglePathProps) {
-  const { mtxUrl } = useMediaMtxUrl();
   const { mutate: togglePath, isPending } = api.path.toggle.useMutation({
     onSuccess: () => {
       toast.success(
@@ -59,7 +57,6 @@ export function TogglePath({ name, isActive, onToggle }: TogglePathProps) {
           onClick={() => {
             togglePath({
               name,
-              mtxUrl,
               enabled: !isActive,
             });
           }}

@@ -2,7 +2,7 @@
 
 import type { DataTableFilterField } from "@/types";
 import type { Table } from "@tanstack/react-table";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import * as React from "react";
 
 import { DataTableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
@@ -113,7 +113,9 @@ export function DataTableToolbar<TData>({
         </div>
 
         <Link href="/create">
-          <Button>Add Path</Button>
+          <Button>
+            <Plus /> Add Path
+          </Button>
         </Link>
       </div>
       <div className="flex items-center gap-2">{children}</div>

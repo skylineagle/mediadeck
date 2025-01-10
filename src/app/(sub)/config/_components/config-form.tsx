@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import type { ConfigFormData } from "@/lib/schemas/config.schema";
 import { api } from "@/trpc/react";
 import { TRPCClientError } from "@trpc/client";
@@ -26,25 +25,23 @@ import { toast } from "sonner";
 import { ConfigDiff } from "./config-diff";
 
 export function ConfigForm() {
-  const { mtxUrl } = useMediaMtxUrl();
   const utils = api.useUtils();
   const timeoutRef = useRef<NodeJS.Timeout>();
   const [isAlertOpen, setIsAlertOpen] = useState(true);
 
-  const { data: configs } = api.config.get.useQuery({ mtxUrl });
-  // configs?.mtxConfig;
+  const { data: configs } = api.config.get.useQuery();
 
   const { mutate: updateConfig, isPending: isUpdating } =
     api.config.update.useMutation({
-      onMutate: async ({ mtxUrl, ...updates }) => {
+      onMutate: async (updates) => {
         // Cancel any outgoing refetches
         await utils.config.get.cancel();
 
         // Snapshot the previous value
-        const previousConfig = utils.config.get.getData({ mtxUrl });
+        const previousConfig = utils.config.get.getData();
 
         // Optimistically update to the new value
-        utils.config.get.setData({ mtxUrl }, (old) => {
+        utils.config.get.setData(undefined, (old) => {
           if (!old) return old;
           return {
             ...old,
@@ -58,7 +55,7 @@ export function ConfigForm() {
       onError: (error, variables, context) => {
         // Revert optimistic update on error
         if (context?.previousConfig) {
-          utils.config.get.setData({ mtxUrl }, context.previousConfig);
+          utils.config.get.setData(undefined, context.previousConfig);
         }
         if (error instanceof TRPCClientError) {
           toast.error(error.message);
@@ -78,7 +75,7 @@ export function ConfigForm() {
       }
 
       // Set optimistic update in the cache directly
-      utils.config.get.setData({ mtxUrl }, (old) => {
+      utils.config.get.setData(undefined, (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -91,10 +88,10 @@ export function ConfigForm() {
 
       // Debounce the actual update
       timeoutRef.current = setTimeout(() => {
-        updateConfig({ mtxUrl, [key]: value });
+        updateConfig({ [key]: value });
       }, 500);
     },
-    [mtxUrl, updateConfig, utils.config.get],
+    [updateConfig, utils.config.get],
   );
 
   const { mutate: syncConfig, isPending: isSyncing } =
@@ -114,9 +111,9 @@ export function ConfigForm() {
 
   const handleSync = useCallback(
     (source: "mtx" | "db") => {
-      syncConfig({ mtxUrl, source });
+      syncConfig({ source });
     },
-    [mtxUrl, syncConfig],
+    [syncConfig],
   );
 
   // Check if configs are out of sync

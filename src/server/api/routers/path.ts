@@ -1,6 +1,6 @@
+import { env } from "@/env";
 import { pathSchema } from "@/lib/schemas/path.schema";
 import type { Path, PathConfig } from "@/lib/types";
-import { withMtxUrl } from "@/lib/validators";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { paths } from "@/server/db/schema";
 import type { EnhancedPath } from "@/types";
@@ -11,87 +11,102 @@ import { z } from "zod";
 import { getPathConfigs, listActivePaths, parseDbPaths } from "./utils";
 
 export const pathRouter = createTRPCRouter({
-  getAllPaths: publicProcedure
-    .input(withMtxUrl)
-    .query(async ({ ctx, input }) => {
-      const result = await ctx.db.query.paths.findMany({
-        orderBy: (paths, { asc }) => [asc(paths.name)],
-      });
+  getAllPaths: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.db.query.paths.findMany({
+      orderBy: (paths, { asc }) => [asc(paths.name)],
+    });
 
-      const dbPaths = parseDbPaths(result);
-      const pathConfigs = await getPathConfigs(input.mtxUrl);
-      const activePaths = await listActivePaths(input.mtxUrl);
+    const dbPaths = parseDbPaths(result);
+    const pathConfigs = await getPathConfigs();
+    const activePaths = await listActivePaths();
 
-      const enhancedPaths: EnhancedPath[] = [
-        ...activePaths.map((path) => ({
-          ...(pathConfigs.find((p) => p.name === path.name) ?? path),
+    const enhancedPaths: EnhancedPath[] = [
+      ...activePaths.map((path) => ({
+        ...(pathConfigs.find((p) => p.name === path.name) ?? path),
+        status: {
+          isInDb: dbPaths.some((p) => p.name === path.name),
+          isActive: true,
+        },
+      })),
+      ...dbPaths
+        .filter((path) => !activePaths.some((ap) => ap.name === path.name))
+        .map((path) => ({
+          ...path,
           status: {
-            isInDb: dbPaths.some((p) => p.name === path.name),
-            isActive: true,
+            isInDb: true,
+            isActive: false,
           },
         })),
-        ...dbPaths
-          .filter((path) => !activePaths.some((ap) => ap.name === path.name))
-          .map((path) => ({
-            ...path,
-            status: {
-              isInDb: true,
-              isActive: false,
-            },
-          })),
-      ];
+    ];
 
-      return enhancedPaths;
-    }),
+    return enhancedPaths;
+  }),
 
-  create: publicProcedure
-    .input(z.object({ data: pathSchema, mediamtx: withMtxUrl }))
-    .mutation(async ({ ctx, input }) => {
-      const { data, mediamtx } = input;
-      try {
-        // Add to Media MTX
-        const response = await fetch(
-          `${mediamtx.mtxUrl}/v3/config/paths/add/${data.name}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+  create: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
+    try {
+      // Add to Media MTX
+      const response = await fetch(
+        `${env.MEDIAMTX_API_URL}/v3/config/paths/add/${input.name}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(input),
+        },
+      );
 
-        if (!response.ok) {
-          const body = await response.json();
-          throw new Error(body.error);
-        }
-
-        // Add to database with boolean to string conversion
-
-        // Get the created path from MediaMTX to ensure we have the latest data
-        const createdPath = await ky
-          .get<PathConfig>(
-            `${mediamtx.mtxUrl}/v3/config/paths/get/${data.name}`,
-          )
-          .json();
-
-        if (!createdPath)
-          throw new Error("Failed to get created path from MediaMTX");
-
-        await ctx.db.insert(paths).values({
-          ...createdPath,
-          name: data.name,
-        });
-
-        revalidatePath("/");
-        return { success: true };
-      } catch (error) {
-        throw error;
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(body.error);
       }
-    }),
+
+      // Add to database with boolean to string conversion
+
+      // Get the created path from MediaMTX to ensure we have the latest data
+      const createdPath = await ky
+        .get<PathConfig>(
+          `${env.MEDIAMTX_API_URL}/v3/config/paths/get/${input.name}`,
+        )
+        .json();
+
+      if (!createdPath)
+        throw new Error("Failed to get created path from MediaMTX");
+
+      await ctx.db.insert(paths).values({
+        ...createdPath,
+        name: input.name,
+      });
+
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  }),
 
   sync: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
     // Add to database
+    // Check if this is a session path (no source) and add it to MediaMTX if so
+    console.log(input);
+
+    if (!input.source) {
+      const response = await fetch(
+        `${env.MEDIAMTX_API_URL}/v3/config/paths/add/${input.name}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...input, source: "publisher" }),
+        },
+      );
+
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(body.error);
+      }
+    }
     await ctx.db.insert(paths).values({
       ...input,
     });
@@ -99,9 +114,9 @@ export const pathRouter = createTRPCRouter({
   }),
 
   remove: publicProcedure
-    .input(z.object({ name: z.string() }).merge(withMtxUrl))
+    .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const { mtxUrl, name } = input;
+      const { name } = input;
       // Remove from MediaMTX
       // Get path data from database
       const pathData = await ctx.db.query.paths.findFirst({
@@ -112,10 +127,14 @@ export const pathRouter = createTRPCRouter({
 
       // Check if path exists on MediaMTX
       try {
-        const response = await ky.get(`${mtxUrl}/v3/config/paths/get/${name}`);
+        const response = await ky.get(
+          `${env.MEDIAMTX_API_URL}/v3/config/paths/get/${name}`,
+        );
 
         if (response.status === 200) {
-          await ky.delete(`${mtxUrl}/v3/config/paths/delete/${name}`);
+          await ky.delete(
+            `${env.MEDIAMTX_API_URL}/v3/config/paths/delete/${name}`,
+          );
         }
       } catch (error) {
         if (!(error instanceof HTTPError && error.response.status === 404)) {
@@ -131,11 +150,9 @@ export const pathRouter = createTRPCRouter({
     }),
 
   toggle: publicProcedure
-    .input(
-      z.object({ name: z.string(), enabled: z.boolean() }).merge(withMtxUrl),
-    )
+    .input(z.object({ name: z.string(), enabled: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const { mtxUrl, name, enabled } = input;
+      const { name, enabled } = input;
       // Update MediaMTX
       if (enabled) {
         // Get path data from database
@@ -150,7 +167,7 @@ export const pathRouter = createTRPCRouter({
 
         // Add to MediaMTX
         const response = await ky.post(
-          `${mtxUrl}/v3/config/paths/add/${info.name}`,
+          `${env.MEDIAMTX_API_URL}/v3/config/paths/add/${info.name}`,
           {
             json: info,
           },
@@ -163,7 +180,7 @@ export const pathRouter = createTRPCRouter({
       } else {
         // Remove from MediaMTX
         const response = await ky.delete(
-          `${mtxUrl}/v3/config/paths/delete/${name}`,
+          `${env.MEDIAMTX_API_URL}/v3/config/paths/delete/${name}`,
         );
 
         if (!response.ok) {
@@ -175,30 +192,13 @@ export const pathRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  listPublishers: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
-    const paths = await ky.get<Path[]>(`${input.mtxUrl}/v3/paths/list`).json();
-
-    const publisherPaths = paths?.filter((path) => {
-      if (!path.source) return false;
-      return [
-        "rtmpConn",
-        "rtspSession",
-        "rtspsSession",
-        "srtConn",
-        "webRTCSession",
-      ].includes(path.source.type ?? "");
-    });
-
-    return publisherPaths;
-  }),
-
   getPathState: publicProcedure
-    .input(z.object({ name: z.string() }).merge(withMtxUrl))
+    .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {
-      const { mtxUrl, name } = input;
+      const { name } = input;
       try {
         const path = await ky
-          .get<Path>(`${mtxUrl}/v3/paths/get/${name}`)
+          .get<Path>(`${env.MEDIAMTX_API_URL}/v3/paths/get/${name}`)
           .json();
 
         return path;
@@ -212,9 +212,9 @@ export const pathRouter = createTRPCRouter({
       }
     }),
 
-  healthcheck: publicProcedure.input(withMtxUrl).query(async ({ input }) => {
+  healthcheck: publicProcedure.query(async () => {
     try {
-      await ky.get(`${input.mtxUrl}/v3/paths/list`).json();
+      await ky.get(`${env.MEDIAMTX_API_URL}/v3/paths/list`).json();
       return { isConnected: true };
     } catch {
       return { isConnected: false };
@@ -222,50 +222,47 @@ export const pathRouter = createTRPCRouter({
   }),
 
   getPathConfig: publicProcedure
-    .input(z.object({ name: z.string() }).merge(withMtxUrl))
+    .input(z.object({ name: z.string() }))
     .query(async ({ input }) => {
-      const { mtxUrl, name } = input;
+      const { name } = input;
       const response = await ky
-        .get<PathConfig>(`${mtxUrl}/v3/config/paths/get/${name}`)
+        .get<PathConfig>(`${env.MEDIAMTX_API_URL}/v3/config/paths/get/${name}`)
         .json();
       return response;
     }),
 
-  update: publicProcedure
-    .input(z.object({ data: pathSchema, mediamtx: withMtxUrl }))
-    .mutation(async ({ ctx, input }) => {
-      const { data, mediamtx } = input;
-      try {
-        // Update in Media MTX
-        const response = await fetch(
-          `${mediamtx.mtxUrl}/v3/config/paths/patch/${data.name}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+  update: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
+    try {
+      // Update in Media MTX
+      const response = await fetch(
+        `${env.MEDIAMTX_API_URL}/v3/config/paths/patch/${input.name}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(input),
+        },
+      );
 
-        if (!response.ok) {
-          const body = await response.json();
-          throw new Error(body.error);
-        }
-
-        // Update in database
-        await ctx.db
-          .update(paths)
-          .set({
-            ...data,
-            updatedAt: new Date(),
-          })
-          .where(eq(paths.name, data.name));
-
-        revalidatePath("/");
-        return { success: true };
-      } catch (error) {
-        throw error;
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(body.error);
       }
-    }),
+
+      // Update in database
+      await ctx.db
+        .update(paths)
+        .set({
+          ...input,
+          updatedAt: new Date(),
+        })
+        .where(eq(paths.name, input.name));
+
+      revalidatePath("/");
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  }),
 });

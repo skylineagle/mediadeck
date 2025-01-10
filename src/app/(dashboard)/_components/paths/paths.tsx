@@ -15,9 +15,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { env } from "@/env";
 import { useDataTable } from "@/hooks/use-data-table";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
-import { useSettings } from "@/hooks/use-settings";
 import { api } from "@/trpc/react";
 import type { EnhancedPath } from "@/types";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -29,15 +28,15 @@ import { toast } from "sonner";
 import { filterFields } from "./const";
 
 export function Paths() {
-  const { mtxUrl } = useMediaMtxUrl();
-  const { settings } = useSettings();
   const router = useRouter();
   const { data: paths = [], refetch } = api.path.getAllPaths.useQuery(
-    { mtxUrl },
+    undefined,
     {
-      refetchInterval: settings.refreshInterval,
+      refetchInterval: env.NEXT_PUBLIC_METRICS_POLL_INTERVAL,
     },
   );
+
+  console.log(paths);
 
   const { mutate: syncPath } = api.path.sync.useMutation({
     onSuccess: () => {
@@ -223,14 +222,14 @@ export function Paths() {
               <div key={`${path.name}-edit`}>
                 {isInDb && (
                   <Link href={`/edit/${path.name}`}>
-                    <Button variant="default" size="icon">
+                    <Button variant="secondary" size="icon">
                       <Pencil className="h-4 w-4" />
                     </Button>
                   </Link>
                 )}
               </div>
               <div key={`${path.name}-toggle`}>
-                {isInDb && path.source?.type && (
+                {isInDb && (
                   <TogglePath
                     name={path.name}
                     isActive={path.status.isActive}

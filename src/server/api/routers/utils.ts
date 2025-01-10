@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import type { PathsConfigsResponse, PathsResponse } from "@/lib/types";
 import type { Path } from "@/server/db/types";
 import type { CombinedPath } from "@/types";
@@ -12,9 +13,9 @@ export function parseDbPaths(paths: Path[]): CombinedPath[] {
   }));
 }
 
-export async function getPathConfigs(mtxUrl: string) {
+export async function getPathConfigs() {
   const response = await ky
-    .get<PathsConfigsResponse>(`${mtxUrl}/v3/config/paths/list`)
+    .get<PathsConfigsResponse>(`${env.MEDIAMTX_API_URL}/v3/config/paths/list`)
     .json();
 
   const relevantPaths =
@@ -28,9 +29,9 @@ export async function getPathConfigs(mtxUrl: string) {
   }));
 }
 
-export async function listActivePaths(mtxUrl: string) {
+export async function listActivePaths() {
   const response = await ky
-    .get<PathsResponse>(`${mtxUrl}/v3/paths/list`)
+    .get<PathsResponse>(`${env.MEDIAMTX_API_URL}/v3/paths/list`)
     .json();
 
   const relevantPaths =

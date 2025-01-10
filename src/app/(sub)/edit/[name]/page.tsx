@@ -1,7 +1,6 @@
 "use client";
 
 import { CreatePathForm } from "@/components/path-form";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import { type Path } from "@/lib/schemas/path.schema";
 import { api } from "@/trpc/react";
 import type { TRPCClientErrorLike } from "@trpc/client";
@@ -11,13 +10,12 @@ import { toast } from "sonner";
 
 export default function EditPathPage() {
   const { name } = useParams<{ name: string }>();
-  const { mtxUrl } = useMediaMtxUrl();
+
   const utils = api.useUtils();
   const router = useRouter();
 
   const { data: path, isLoading } = api.path.getPathConfig.useQuery({
     name,
-    mtxUrl,
   });
 
   const { mutate: updatePath, isPending: isUpdating } =
@@ -25,7 +23,7 @@ export default function EditPathPage() {
       onSuccess: () => {
         toast.success("Path updated successfully");
         router.push("/");
-        utils.path.getPathConfig.invalidate({ name, mtxUrl });
+        utils.path.getPathConfig.invalidate({ name });
         utils.path.getAllPaths.invalidate();
         router.refresh();
       },
@@ -53,9 +51,7 @@ export default function EditPathPage() {
       <CreatePathForm
         initialData={pathWithDefaults}
         submitButtonText="Update Path"
-        onSubmit={(values: Path) =>
-          updatePath({ data: values, mediamtx: { mtxUrl } })
-        }
+        onSubmit={(values: Path) => updatePath(values)}
         isPending={isUpdating}
       />
     </div>

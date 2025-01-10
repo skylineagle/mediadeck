@@ -1,7 +1,7 @@
+import { env } from "@/env";
 import type { Config } from "@/lib/types";
-import { withMtxUrl } from "@/lib/validators";
-import { config } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { config } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import ky from "ky";
 import { z } from "zod";
@@ -111,12 +111,10 @@ const configSchema = z.object({
 });
 
 export const configRouter = createTRPCRouter({
-  get: publicProcedure.input(withMtxUrl).query(async ({ ctx, input }) => {
-    const { mtxUrl } = input;
-
+  get: publicProcedure.query(async ({ ctx }) => {
     // Get MediaMTX config
     const mtxConfig = await ky
-      .get<Config>(`${mtxUrl}/v3/config/global/get`)
+      .get<Config>(`${env.MEDIAMTX_API_URL}/v3/config/global/get`)
       .json();
 
     // Get DB config
@@ -129,12 +127,10 @@ export const configRouter = createTRPCRouter({
   }),
 
   update: publicProcedure
-    .input(z.object(configSchema.partial().shape).merge(withMtxUrl))
+    .input(z.object(configSchema.partial().shape))
     .mutation(async ({ ctx, input }) => {
-      const { mtxUrl, ...configData } = input;
-
-      await ky.patch(`${mtxUrl}/v3/config/global/patch`, {
-        json: configData,
+      await ky.patch(`${env.MEDIAMTX_API_URL}/v3/config/global/patch`, {
+        json: input,
       });
 
       // Update DB
@@ -144,13 +140,13 @@ export const configRouter = createTRPCRouter({
         await ctx.db
           .update(config)
           .set({
-            config: { ...(existingConfig?.config as Config), ...configData },
+            config: { ...(existingConfig?.config as Config), ...input },
             updatedAt: new Date(),
           })
           .where(eq(config.id, existingConfig.id));
       } else {
         await ctx.db.insert(config).values({
-          config: configData,
+          config: input,
         });
       }
 
@@ -159,19 +155,17 @@ export const configRouter = createTRPCRouter({
 
   sync: publicProcedure
     .input(
-      z
-        .object({
-          source: z.enum(["mtx", "db"]),
-        })
-        .merge(withMtxUrl),
+      z.object({
+        source: z.enum(["mtx", "db"]),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { mtxUrl, source } = input;
+      const { source } = input;
 
       if (source === "mtx") {
         // Get MediaMTX config and save to DB
         const mtxConfig = await ky
-          .get<Config>(`${mtxUrl}/v3/config/global/get`)
+          .get<Config>(`${env.MEDIAMTX_API_URL}/v3/config/global/get`)
           .json();
 
         const existingConfig = await ctx.db.query.config.findFirst();
@@ -194,7 +188,7 @@ export const configRouter = createTRPCRouter({
           throw new Error("No configuration found in database");
         }
 
-        await ky.patch(`${mtxUrl}/v3/config/global/patch`, {
+        await ky.patch(`${env.MEDIAMTX_API_URL}/v3/config/global/patch`, {
           json: dbConfig.config,
         });
       }

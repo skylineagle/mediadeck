@@ -1,7 +1,5 @@
 "use client";
 
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
-import { useSettings } from "@/hooks/use-settings";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
 import {
@@ -12,14 +10,9 @@ import {
 } from "./ui/tooltip";
 
 export function MediaMtxStatus() {
-  const { mtxUrl } = useMediaMtxUrl();
-  const { settings } = useSettings();
-  const { data } = api.path.healthcheck.useQuery(
-    { mtxUrl },
-    {
-      refetchInterval: settings.refreshInterval,
-    },
-  );
+  const { data } = api.path.healthcheck.useQuery(undefined, {
+    refetchInterval: 1000,
+  });
 
   const isConnected = data?.isConnected ?? false;
 

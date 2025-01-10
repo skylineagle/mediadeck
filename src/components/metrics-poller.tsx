@@ -1,6 +1,6 @@
 "use client";
 
-import { useSettings } from "@/hooks/use-settings";
+import { env } from "@/env";
 import { fetchMetrics } from "@/lib/services/metrics";
 import { useMetricsStore } from "@/lib/stores/metrics";
 import { useEffect, useRef } from "react";
@@ -11,7 +11,6 @@ interface MetricsPollerProps {
 
 export function MetricsPoller({ enabled = true }: MetricsPollerProps) {
   const { setMetrics, setError, setLoading } = useMetricsStore();
-  const { settings } = useSettings();
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export function MetricsPoller({ enabled = true }: MetricsPollerProps) {
         if (enabled) {
           timeoutRef.current = setTimeout(
             () => void pollMetrics(),
-            settings.refreshInterval,
+            env.NEXT_PUBLIC_METRICS_POLL_INTERVAL,
           );
         }
       }
@@ -44,7 +43,7 @@ export function MetricsPoller({ enabled = true }: MetricsPollerProps) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [enabled, setMetrics, setError, setLoading, settings.refreshInterval]);
+  }, [enabled, setMetrics, setError, setLoading]);
 
   return null;
 }

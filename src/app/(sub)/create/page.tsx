@@ -1,7 +1,6 @@
 "use client";
 
 import { CreatePathForm } from "@/components/path-form";
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
 import type { pathSchema } from "@/lib/schemas/path.schema";
 import { api } from "@/trpc/react";
 import { TRPCClientError } from "@trpc/client";
@@ -10,7 +9,6 @@ import { toast } from "sonner";
 import type { z } from "zod";
 
 export default function CreatePathPage() {
-  const { mtxUrl } = useMediaMtxUrl();
   const router = useRouter();
 
   const { mutate, isPending } = api.path.create.useMutation({
@@ -30,7 +28,7 @@ export default function CreatePathPage() {
   });
 
   function handleSubmit(values: z.infer<typeof pathSchema>) {
-    mutate({ data: values, mediamtx: { mtxUrl } });
+    mutate(values);
   }
 
   return (

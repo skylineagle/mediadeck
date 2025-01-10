@@ -1,7 +1,6 @@
 "use client";
 
-import { useMediaMtxUrl } from "@/hooks/use-mediamtx-url";
-import { useSettings } from "@/hooks/use-settings";
+import { env } from "@/env";
 import type { Path } from "@/lib/types";
 import { api } from "@/trpc/react";
 import { motion } from "framer-motion";
@@ -60,11 +59,12 @@ function getPathState(pathState: Path): StatusType {
 }
 
 export const PathStatus: React.FC<LiveIconProps> = ({ path }) => {
-  const { mtxUrl } = useMediaMtxUrl();
-  const { settings } = useSettings();
   const { data: pathState } = api.path.getPathState.useQuery(
-    { mtxUrl, name: path },
-    { throwOnError: false, refetchInterval: settings.refreshInterval },
+    { name: path },
+    {
+      throwOnError: false,
+      refetchInterval: env.NEXT_PUBLIC_METRICS_POLL_INTERVAL,
+    },
   );
 
   if (!pathState) {

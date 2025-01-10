@@ -1,17 +1,15 @@
 services:
   traefik:
-    image: traefik:v2.10
+    image: traefik:latest
     container_name: traefik
     restart: unless-stopped
     ports:
       - "80:80"
-      - "443:443"
       - "8080:8080" # Dashboard
       - "5432:5432" # PostgreSQL TCP entrypoint
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik:/etc/traefik
-      - traefik_data:/letsencrypt
+      - ./compose/traefik:/etc/traefik
     networks:
       - monitoring
     command:
@@ -19,15 +17,14 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
-      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
-      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
 
   mediamtx:
     image: bluenviron/mediamtx:1.10.0
     container_name: mediamtx
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "8554:8554" # RTSP
       - "5555:5555" # UDP stream
@@ -35,12 +32,13 @@ services:
       - "8889:8889" # WebRTC
       - "9997:9997" # API
       - "9998:9998" # Metrics
-    volumes:
-      - ./mediamtx.yml:/mediamtx.yml
     networks:
       monitoring:
         aliases:
           - mediamtx.localhost
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - MEDIAMTX_URL=http://localhost:9997
     labels:
       - "traefik.enable=true"
       # API endpoint
@@ -64,43 +62,33 @@ services:
       - "traefik.http.routers.mediamtx-webrtc.entrypoints=web"
       - "traefik.http.services.mediamtx-webrtc.loadbalancer.server.port=8889"
 
-  n8n:
-    image: docker.n8n.io/n8nio/n8n
-    container_name: n8n
-    restart: always
-    ports:
-      - "127.0.0.1:5678:5678"
+  sync:
+    image: oven/bun:1
+    container_name: mediamtx-sync
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgresql://postgres:bgCHKMhIKNov8PaG@postgres:5432/mediamtx-panel
+      - MEDIAMTX_URL=http://mediamtx:9997
     networks:
       - monitoring
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
-      - traefik.http.routers.n8n.tls=true
-      - traefik.http.routers.n8n.entrypoints=web,websecure
-      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
-      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
-      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
-      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
-      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
-      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
-      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
-      - traefik.http.middlewares.n8n.headers.STSPreload=true
-      - traefik.http.routers.n8n.middlewares=n8n@docker
-    environment:
-      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=https
-      - NODE_ENV=production
-      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
-      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
     volumes:
-      - n8n_data:/home/node/.n8n
+      - .:/app
+    working_dir: /app
+    command: ["bun", "run", "sync"]
 
   postgres:
     image: postgres:latest
     container_name: mediamtx-panel-postgres
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=bgCHKMhIKNov8PaG
@@ -120,6 +108,4 @@ networks:
     driver: bridge
 
 volumes:
-  traefik_data: {}
-  n8n_data: {}
   postgres_data: {}

@@ -1,29 +1,70 @@
-# Create T3 App
+# MediaMTX Panel
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A panel for managing MediaMTX paths and configuration with automatic database synchronization.
 
-## What's next? How do I make an app with this?
+## Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Automatic synchronization of paths and configuration from database to MediaMTX on startup.
+- TypeScript-based sync script.
+- Docker Compose setup with health checks.
+- Database persistence for MediaMTX instance paths and configuration.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Setup
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+1. Make sure you have the following prerequisites:
 
-## Learn More
+   - Docker and Docker Compose
+   - Node.js / Bun
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+2. Set up your environment variables:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+   ```bash
+   # Create a .env file
+   cp .env.example .env
+   ```
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+   Required environment variables:
 
-## How do I deploy this?
+   - `DATABASE_URL`: PostgreSQL connection string
+   - `MEDIAMTX_URL`: MediaMTX API URL (default: http://localhost:9997)
+   - `DOMAIN_NAME`: Your domain name
+   - `SSL_EMAIL`: Email for SSL certificates
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+3. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+4. Start the services:
+   ```bash
+   docker-compose -f compose/docker-compose.yml up -d
+   ```
+
+## How it Works
+
+The sync functionality works as follows:
+
+1. When the MediaMTX service starts, it waits for the API to be available (health check)
+2. The post-start script (`scripts/sync-mediamtx.ts`) runs and:
+   - Connects to the PostgreSQL database
+   - Retrieves all paths and the latest configuration
+   - Updates the MediaMTX global configuration
+   - Syncs each path (creates or updates as needed)
+
+## Development
+
+To run the sync script manually:
+
+```bash
+bun run sync
+```
+
+## Troubleshooting
+
+If the sync fails:
+
+1. Check the MediaMTX logs: `docker logs mediamtx`
+2. Verify database connectivity
+3. Ensure the MediaMTX API is accessible
+4. Check environment variables are set correctly

@@ -18,7 +18,8 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "sync": "bun run src/scripts/sync-mediamtx.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -36,8 +36,6 @@ export function Paths() {
     },
   );
 
-  console.log(paths);
-
   const { mutate: syncPath } = api.path.sync.useMutation({
     onSuccess: () => {
       toast.success("Path synced");
@@ -59,11 +57,11 @@ export function Paths() {
   const columns: ColumnDef<EnhancedPath>[] = useMemo(
     () => [
       {
-        accessorKey: "status",
+        accessorKey: "isInDb",
         header: "DB",
         cell: ({ row }) => {
           const path = row.original;
-          const isInDb = path.status.isInDb;
+          const isInDb = path.isInDb;
 
           return (
             <TooltipProvider>
@@ -194,7 +192,7 @@ export function Paths() {
         header: "Actions",
         cell: ({ row }) => {
           const path = row.original;
-          const isInDb = path.status.isInDb;
+          const isInDb = path.isInDb;
 
           return (
             <div className="grid grid-cols-4 gap-2">
@@ -232,7 +230,7 @@ export function Paths() {
                 {isInDb && (
                   <TogglePath
                     name={path.name}
-                    isActive={path.status.isActive}
+                    isActive={path.isActive}
                     onToggle={refetch}
                   />
                 )}

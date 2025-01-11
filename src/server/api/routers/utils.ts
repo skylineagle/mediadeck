@@ -9,11 +9,10 @@ export function parseDbPaths(paths: Path[]): CombinedPath[] {
     name: path.name ?? "",
     source: { type: path.source ?? null },
     record: path.record ?? false,
-    isActive: false,
   }));
 }
 
-export async function getPathConfigs() {
+export async function getPathConfigs(): Promise<CombinedPath[]> {
   const response = await ky
     .get<PathsConfigsResponse>(`${env.MEDIAMTX_API_URL}/v3/config/paths/list`)
     .json();
@@ -25,11 +24,10 @@ export async function getPathConfigs() {
     name: path.name ?? "",
     source: { type: path.source ?? null },
     record: path.record ?? false,
-    isActive: false,
   }));
 }
 
-export async function listActivePaths() {
+export async function listActivePaths(): Promise<CombinedPath[]> {
   const response = await ky
     .get<PathsResponse>(`${env.MEDIAMTX_API_URL}/v3/paths/list`)
     .json();
@@ -41,6 +39,5 @@ export async function listActivePaths() {
     name: path.name ?? "",
     source: { type: null },
     record: false,
-    isActive: true,
   }));
 }

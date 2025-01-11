@@ -23,21 +23,19 @@ export const pathRouter = createTRPCRouter({
     const enhancedPaths: EnhancedPath[] = [
       ...activePaths.map((path) => ({
         ...(pathConfigs.find((p) => p.name === path.name) ?? path),
-        status: {
-          isInDb: dbPaths.some((p) => p.name === path.name),
-          isActive: true,
-        },
+        isInDb: dbPaths.some((p) => p.name === path.name),
+        isActive: true,
       })),
       ...dbPaths
         .filter((path) => !activePaths.some((ap) => ap.name === path.name))
         .map((path) => ({
           ...path,
-          status: {
-            isInDb: true,
-            isActive: false,
-          },
+          isInDb: true,
+          isActive: false,
         })),
     ];
+
+    console.log(pathConfigs);
 
     return enhancedPaths;
   }),

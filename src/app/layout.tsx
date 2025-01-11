@@ -1,6 +1,5 @@
 import { AnimatedThemeToggle } from "@/components/animated-theme-toggle";
 import { MediaMtxStatus } from "@/components/mediamtx-status";
-import { MetricsPoller } from "@/components/metrics-poller";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -49,7 +48,6 @@ export default function RootLayout({
                     </div>
                   </div>
                   {children}
-                  <MetricsPoller />
                 </div>
                 <Toaster closeButton />
               </TooltipProvider>

@@ -19,7 +19,7 @@ services:
       - "--entrypoints.web.address=:80"
 
   mediamtx:
-    image: bluenviron/mediamtx:1.10.0
+    image: bluenviron/mediamtx:latest
     container_name: mediamtx
     restart: unless-stopped
     depends_on:
@@ -32,13 +32,14 @@ services:
       - "8889:8889" # WebRTC
       - "9997:9997" # API
       - "9998:9998" # Metrics
+    volumes:
+      - ./compose/mediamtx.yml:/mediamtx.yml
     networks:
       monitoring:
         aliases:
           - mediamtx.localhost
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - MEDIAMTX_URL=http://localhost:9997
     labels:
       - "traefik.enable=true"
       # API endpoint

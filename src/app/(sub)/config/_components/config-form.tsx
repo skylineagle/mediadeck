@@ -185,127 +185,17 @@ export function ConfigForm() {
         </AlertDialog>
       )}
 
-      <Tabs defaultValue="api" className="space-y-6">
+      <Tabs defaultValue="rtsp" className="space-y-6">
         <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="api">API</TabsTrigger>
-          <TabsTrigger value="metrics">Metrics</TabsTrigger>
           <TabsTrigger value="rtsp">RTSP</TabsTrigger>
           <TabsTrigger value="rtmp">RTMP</TabsTrigger>
           <TabsTrigger value="hls">HLS</TabsTrigger>
           <TabsTrigger value="webrtc">WebRTC</TabsTrigger>
           <TabsTrigger value="srt">SRT</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
         </TabsList>
         <Card>
           <CardContent className="pt-6">
-            <TabsContent value="api" className="space-y-6">
-              <div>
-                <h2 className="mb-4 text-lg font-semibold">
-                  API Configuration
-                </h2>
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>API Address</Label>
-                      <Input
-                        value={configs?.mtxConfig?.apiAddress ?? ""}
-                        onChange={(e) =>
-                          handleConfigChange("apiAddress", e.target.value)
-                        }
-                        placeholder=":9997"
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Address of the Control API listener
-                      </p>
-                    </div>
-
-                    <FormItem className="flex h-full flex-col justify-end pb-6">
-                      <div className="flex items-center justify-between space-x-3">
-                        <div className="space-y-0.5">
-                          <Label>Enable API</Label>
-                          <p className="text-sm text-muted-foreground">
-                            Enable controlling the server through the Control
-                            API
-                          </p>
-                        </div>
-                        <Switch
-                          checked={configs?.mtxConfig?.api ?? false}
-                          onCheckedChange={(checked) =>
-                            handleConfigChange("api", checked)
-                          }
-                        />
-                      </div>
-                    </FormItem>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormItem className="flex h-full flex-col justify-end pb-6">
-                      <div className="flex items-center justify-between space-x-3">
-                        <div className="space-y-0.5">
-                          <Label>API Encryption</Label>
-                          <p className="text-sm text-muted-foreground">
-                            Enable TLS/HTTPS on the Control API server
-                          </p>
-                        </div>
-                        <Switch
-                          checked={configs?.mtxConfig?.apiEncryption ?? false}
-                          onCheckedChange={(checked) =>
-                            handleConfigChange("apiEncryption", checked)
-                          }
-                        />
-                      </div>
-                    </FormItem>
-
-                    <div className="space-y-2">
-                      <Label>API Allow Origin</Label>
-                      <Input
-                        value={configs?.mtxConfig?.apiAllowOrigin ?? ""}
-                        onChange={(e) =>
-                          handleConfigChange("apiAllowOrigin", e.target.value)
-                        }
-                        placeholder="*"
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Value of the Access-Control-Allow-Origin header
-                      </p>
-                    </div>
-                  </div>
-
-                  {configs?.mtxConfig.apiEncryption && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>API Server Key</Label>
-                        <Input
-                          value={configs?.mtxConfig?.apiServerKey ?? ""}
-                          onChange={(e) =>
-                            handleConfigChange("apiServerKey", e.target.value)
-                          }
-                          placeholder="server.key"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          Path to the server key (required when encryption is
-                          enabled)
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>API Server Certificate</Label>
-                        <Input
-                          value={configs?.mtxConfig?.apiServerCert ?? ""}
-                          onChange={(e) =>
-                            handleConfigChange("apiServerCert", e.target.value)
-                          }
-                          placeholder="server.crt"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          Path to the server certificate
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
             <TabsContent value="metrics" className="space-y-6">
               <div>
                 <h2 className="mb-4 text-lg font-semibold">

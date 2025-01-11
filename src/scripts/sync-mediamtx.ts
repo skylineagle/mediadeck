@@ -3,7 +3,9 @@ import { db } from "@/server/db";
 import { paths } from "@/server/db/schema";
 import ky from "ky";
 
-const MEDIAMTX_API = process.env.MEDIAMTX_URL!;
+// console.log(process.env.MEDIAMTX_URL);
+
+const MEDIAMTX_API = "http://mediamtx:9997/";
 
 // Get the underlying postgres connection
 const sql = db.$client;

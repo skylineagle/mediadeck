@@ -24,16 +24,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="h-screen">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <NuqsAdapter>
-              <TRPCReactProvider>
+      <body className="h-screen" suppressHydrationWarning>
+        <NuqsAdapter>
+          <TRPCReactProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TooltipProvider>
                 <div className="container mx-auto h-full p-6">
                   <div className="mb-6 flex items-center justify-between">
                     <div className="flex items-center gap-6">
@@ -51,11 +51,11 @@ export default function RootLayout({
                   {children}
                   <MetricsPoller />
                 </div>
-              </TRPCReactProvider>
-            </NuqsAdapter>
-            <Toaster closeButton />
-          </TooltipProvider>
-        </ThemeProvider>
+                <Toaster closeButton />
+              </TooltipProvider>
+            </ThemeProvider>
+          </TRPCReactProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

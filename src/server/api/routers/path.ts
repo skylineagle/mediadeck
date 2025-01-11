@@ -35,8 +35,6 @@ export const pathRouter = createTRPCRouter({
         })),
     ];
 
-    console.log(pathConfigs);
-
     return enhancedPaths;
   }),
 
@@ -86,7 +84,6 @@ export const pathRouter = createTRPCRouter({
   sync: publicProcedure.input(pathSchema).mutation(async ({ ctx, input }) => {
     // Add to database
     // Check if this is a session path (no source) and add it to MediaMTX if so
-    console.log(input);
 
     if (!input.source) {
       const response = await fetch(

@@ -21,7 +21,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
-    NEXT_PUBLIC_METRICS_POLL_INTERVAL: z.number().default(1000),
+    NEXT_PUBLIC_METRICS_POLL_INTERVAL: z.number().default(2000),
   },
 
   /**

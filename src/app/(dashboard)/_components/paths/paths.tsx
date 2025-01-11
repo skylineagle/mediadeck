@@ -189,15 +189,15 @@ export function Paths() {
       },
       {
         id: "actions",
-        header: "Actions",
         cell: ({ row }) => {
           const path = row.original;
+          const isSession = Boolean(!path.source?.type);
           const isInDb = path.isInDb;
 
           return (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 items-center gap-2">
               <div key={`${path.name}-sync`}>
-                {!isInDb && (
+                {!isInDb && !isSession && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <form onSubmit={handleSync(path)}>
